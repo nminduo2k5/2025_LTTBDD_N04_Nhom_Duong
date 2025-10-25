@@ -11,11 +11,13 @@ class User {
     required this.password,
   });
 
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(
+      Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? '',
       email: json['email'] ?? 'Unknown Email',
-      username: json['username'] ?? 'Unknown Username',
+      username:
+          json['username'] ?? 'Unknown Username',
       password: '',
     );
   }

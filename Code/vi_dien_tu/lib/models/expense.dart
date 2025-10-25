@@ -17,7 +17,8 @@ class Expense {
     this.type = 'Chi tiêu',
   });
 
-  factory Expense.fromMap(Map<String, dynamic> map) {
+  factory Expense.fromMap(
+      Map<String, dynamic> map) {
     return Expense(
       id: map['id'] ?? '',
       title: map['title'] ?? '',

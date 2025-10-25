@@ -1,7 +1,8 @@
 class Wallet {
   final String id;
   final String name;
-  final String type; // 'cash', 'bank', 'credit', 'savings'
+  final String
+      type; // 'cash', 'bank', 'credit', 'savings'
   final double balance;
   final String currency;
   final String? bankName;
@@ -25,12 +26,15 @@ class Wallet {
     this.icon = 'wallet',
   });
 
-  factory Wallet.fromJson(Map<String, dynamic> json) {
+  factory Wallet.fromJson(
+      Map<String, dynamic> json) {
     return Wallet(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       type: json['type'] ?? 'cash',
-      balance: (json['balance'] as num?)?.toDouble() ?? 0.0,
+      balance:
+          (json['balance'] as num?)?.toDouble() ??
+              0.0,
       currency: json['currency'] ?? 'VND',
       bankName: json['bankName'],
       accountNumber: json['accountNumber'],
@@ -77,7 +81,8 @@ class Wallet {
       balance: balance ?? this.balance,
       currency: currency ?? this.currency,
       bankName: bankName ?? this.bankName,
-      accountNumber: accountNumber ?? this.accountNumber,
+      accountNumber:
+          accountNumber ?? this.accountNumber,
       cardNumber: cardNumber ?? this.cardNumber,
       isDefault: isDefault ?? this.isDefault,
       color: color ?? this.color,
