@@ -6,8 +6,10 @@ class FinancialGoal {
   final double currentAmount;
   final DateTime startDate;
   final DateTime targetDate;
-  final String category; // 'savings', 'investment', 'purchase', 'debt'
-  final String priority; // 'low', 'medium', 'high'
+  final String
+      category; // 'savings', 'investment', 'purchase', 'debt'
+  final String
+      priority; // 'low', 'medium', 'high'
   final bool isCompleted;
   final String? imageUrl;
 
@@ -27,7 +29,8 @@ class FinancialGoal {
 
   double get progressPercentage {
     if (targetAmount <= 0) return 0.0;
-    return (currentAmount / targetAmount * 100).clamp(0.0, 100.0);
+    return (currentAmount / targetAmount * 100)
+        .clamp(0.0, 100.0);
   }
 
   int get daysRemaining {
@@ -38,19 +41,32 @@ class FinancialGoal {
 
   double get dailyRequiredAmount {
     if (daysRemaining <= 0) return 0.0;
-    final remaining = targetAmount - currentAmount;
-    return remaining > 0 ? remaining / daysRemaining : 0.0;
+    final remaining =
+        targetAmount - currentAmount;
+    return remaining > 0
+        ? remaining / daysRemaining
+        : 0.0;
   }
 
-  factory FinancialGoal.fromJson(Map<String, dynamic> json) {
+  factory FinancialGoal.fromJson(
+      Map<String, dynamic> json) {
     return FinancialGoal(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       description: json['description'] ?? '',
-      targetAmount: (json['targetAmount'] as num?)?.toDouble() ?? 0.0,
-      currentAmount: (json['currentAmount'] as num?)?.toDouble() ?? 0.0,
-      startDate: DateTime.parse(json['startDate'] ?? DateTime.now().toIso8601String()),
-      targetDate: DateTime.parse(json['targetDate'] ?? DateTime.now().toIso8601String()),
+      targetAmount: (json['targetAmount'] as num?)
+              ?.toDouble() ??
+          0.0,
+      currentAmount:
+          (json['currentAmount'] as num?)
+                  ?.toDouble() ??
+              0.0,
+      startDate: DateTime.parse(
+          json['startDate'] ??
+              DateTime.now().toIso8601String()),
+      targetDate: DateTime.parse(
+          json['targetDate'] ??
+              DateTime.now().toIso8601String()),
       category: json['category'] ?? 'savings',
       priority: json['priority'] ?? 'medium',
       isCompleted: json['isCompleted'] ?? false,

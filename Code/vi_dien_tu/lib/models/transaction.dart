@@ -1,14 +1,17 @@
 class Transaction {
   final String id;
-  final String type; // 'transfer', 'payment', 'topup', 'withdraw'
+  final String
+      type; // 'transfer', 'payment', 'topup', 'withdraw'
   final double amount;
   final String fromWalletId;
   final String? toWalletId;
-  final String? recipientInfo; // Số điện thoại, email, số tài khoản
+  final String?
+      recipientInfo; // Số điện thoại, email, số tài khoản
   final String? recipientName;
   final String description;
   final DateTime createdAt;
-  final String status; // 'pending', 'completed', 'failed', 'cancelled'
+  final String
+      status; // 'pending', 'completed', 'failed', 'cancelled'
   final String? transactionCode;
   final double? fee;
   final String? qrCode;
@@ -29,17 +32,22 @@ class Transaction {
     this.qrCode,
   });
 
-  factory Transaction.fromJson(Map<String, dynamic> json) {
+  factory Transaction.fromJson(
+      Map<String, dynamic> json) {
     return Transaction(
       id: json['id'] ?? '',
       type: json['type'] ?? '',
-      amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+      amount:
+          (json['amount'] as num?)?.toDouble() ??
+              0.0,
       fromWalletId: json['fromWalletId'] ?? '',
       toWalletId: json['toWalletId'],
       recipientInfo: json['recipientInfo'],
       recipientName: json['recipientName'],
       description: json['description'] ?? '',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+          json['createdAt'] ??
+              DateTime.now().toIso8601String()),
       status: json['status'] ?? 'pending',
       transactionCode: json['transactionCode'],
       fee: (json['fee'] as num?)?.toDouble(),

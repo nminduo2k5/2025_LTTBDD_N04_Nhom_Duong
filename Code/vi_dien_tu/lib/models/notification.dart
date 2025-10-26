@@ -2,7 +2,8 @@ class AppNotification {
   final String id;
   final String title;
   final String message;
-  final String type; // 'transaction', 'reminder', 'goal', 'security', 'promotion'
+  final String
+      type; // 'transaction', 'reminder', 'goal', 'security', 'promotion'
   final DateTime createdAt;
   final bool isRead;
   final Map<String, dynamic>? data;
@@ -19,13 +20,16 @@ class AppNotification {
     this.actionUrl,
   });
 
-  factory AppNotification.fromJson(Map<String, dynamic> json) {
+  factory AppNotification.fromJson(
+      Map<String, dynamic> json) {
     return AppNotification(
       id: json['id'] ?? '',
       title: json['title'] ?? '',
       message: json['message'] ?? '',
       type: json['type'] ?? 'transaction',
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+          json['createdAt'] ??
+              DateTime.now().toIso8601String()),
       isRead: json['isRead'] ?? false,
       data: json['data'],
       actionUrl: json['actionUrl'],

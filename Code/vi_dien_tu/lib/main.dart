@@ -8,6 +8,7 @@ import 'package:vi_dien_tu/providers/settings_provider.dart';
 import 'package:vi_dien_tu/providers/wallet_provider.dart';
 import 'package:vi_dien_tu/providers/transaction_provider.dart';
 import 'package:vi_dien_tu/providers/notification_provider.dart';
+import 'package:vi_dien_tu/utils/app_colors.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,15 +47,43 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.teal,
+                seedColor: AppColors.primary,
                 brightness: Brightness.light,
+              ),
+              primaryColor: AppColors.primary,
+              appBarTheme: const AppBarTheme(
+                backgroundColor:
+                    AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              elevatedButtonTheme:
+                  ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
               ),
             ),
             darkTheme: ThemeData(
               useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.teal,
+                seedColor: AppColors.primary,
                 brightness: Brightness.dark,
+              ),
+              primaryColor: AppColors.primary,
+              appBarTheme: const AppBarTheme(
+                backgroundColor:
+                    AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              elevatedButtonTheme:
+                  ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
               ),
             ),
             themeMode: settings.isDarkMode
