@@ -1,53 +1,39 @@
 import 'package:flutter/foundation.dart';
 import 'package:vi_dien_tu/models/transaction.dart';
-import 'package:vi_dien_tu/services/transaction_service.dart';
+import 'package:vi_dien_tu/services/database_service.dart';
 
 class TransactionProvider with ChangeNotifier {
-  final TransactionService _transactionService =
-      TransactionService();
   List<Transaction> _transactions = [];
   List<Transaction> _filteredTransactions = [];
 
-  List<Transaction> get transactions =>
-      _filteredTransactions;
-  List<Transaction> get allTransactions =>
-      _transactions;
+  List<Transaction> get transactions => _filteredTransactions;
+  List<Transaction> get allTransactions => _transactions;
 
   Future<void> fetchTransactions() async {
     try {
-      _transactions = await _transactionService
-          .getAllTransactions();
+      _transactions = await DatabaseService.getTransactions();
       _filteredTransactions = _transactions;
       notifyListeners();
     } catch (e) {
-      throw Exception(
-          'Failed to fetch transactions: $e');
+      throw Exception('Failed to fetch transactions: $e');
     }
   }
 
-  Future<Transaction> createTransaction(
-      Transaction transaction) async {
+  Future<Transaction> createTransaction(Transaction transaction) async {
     try {
-      final newTransaction =
-          await _transactionService
-              .createTransaction(transaction);
-      _transactions.insert(0, newTransaction);
-      _filteredTransactions =
-          List.from(_transactions);
+      _transactions.insert(0, transaction);
+      await DatabaseService.saveTransactions(_transactions);
+      _filteredTransactions = List.from(_transactions);
       notifyListeners();
-      return newTransaction;
+      return transaction;
     } catch (e) {
-      throw Exception(
-          'Failed to create transaction: $e');
+      throw Exception('Failed to create transaction: $e');
     }
   }
 
   Future<void> updateTransactionStatus(
       String transactionId, String status) async {
     try {
-      await _transactionService
-          .updateTransactionStatus(
-              transactionId, status);
       final index = _transactions.indexWhere(
           (t) => t.id == transactionId);
       if (index != -1) {
@@ -74,6 +60,7 @@ class TransactionProvider with ChangeNotifier {
           qrCode: _transactions[index].qrCode,
         );
         _transactions[index] = updatedTransaction;
+        await DatabaseService.saveTransactions(_transactions);
         _filteredTransactions =
             List.from(_transactions);
         notifyListeners();

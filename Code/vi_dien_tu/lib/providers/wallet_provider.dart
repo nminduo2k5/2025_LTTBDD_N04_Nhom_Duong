@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:vi_dien_tu/models/wallet.dart';
-import 'package:vi_dien_tu/services/wallet_service.dart';
+import 'package:vi_dien_tu/services/database_service.dart';
 
 class WalletProvider with ChangeNotifier {
-  final WalletService _walletService =
-      WalletService();
   List<Wallet> _wallets = [];
   Wallet? _selectedWallet;
 
@@ -25,8 +23,7 @@ class WalletProvider with ChangeNotifier {
 
   Future<void> fetchWallets() async {
     try {
-      _wallets =
-          await _walletService.getAllWallets();
+      _wallets = await DatabaseService.getWallets();
       if (_selectedWallet == null &&
           _wallets.isNotEmpty) {
         _selectedWallet =
@@ -41,9 +38,8 @@ class WalletProvider with ChangeNotifier {
 
   Future<void> addWallet(Wallet wallet) async {
     try {
-      final newWallet =
-          await _walletService.addWallet(wallet);
-      _wallets.add(newWallet);
+      _wallets.add(wallet);
+      await DatabaseService.saveWallets(_wallets);
       notifyListeners();
     } catch (e) {
       throw Exception('Failed to add wallet: $e');
@@ -52,7 +48,6 @@ class WalletProvider with ChangeNotifier {
 
   Future<void> updateWallet(Wallet wallet) async {
     try {
-      await _walletService.updateWallet(wallet);
       final index = _wallets
           .indexWhere((w) => w.id == wallet.id);
       if (index != -1) {
@@ -60,6 +55,7 @@ class WalletProvider with ChangeNotifier {
         if (_selectedWallet?.id == wallet.id) {
           _selectedWallet = wallet;
         }
+        await DatabaseService.saveWallets(_wallets);
         notifyListeners();
       }
     } catch (e) {
@@ -71,7 +67,6 @@ class WalletProvider with ChangeNotifier {
   Future<void> deleteWallet(
       String walletId) async {
     try {
-      await _walletService.deleteWallet(walletId);
       _wallets
           .removeWhere((w) => w.id == walletId);
       if (_selectedWallet?.id == walletId) {
@@ -79,6 +74,7 @@ class WalletProvider with ChangeNotifier {
             ? _wallets.first
             : null;
       }
+      await DatabaseService.saveWallets(_wallets);
       notifyListeners();
     } catch (e) {
       throw Exception(
