@@ -112,15 +112,45 @@
 - **Người dùng (User):** Chủ sở hữu ví điện tử
 - **Hệ thống (System):** Ứng dụng SmartWallet
 
-#### 3.1.2 Các Use Case chính
-- **UC01: Đăng nhập/Đăng ký**
-- **UC02: Quản lý ví**
-- **UC03: Quản lý giao dịch**
-- **UC04: Quản lý chi tiêu**
-- **UC05: Xem thống kê**
-- **UC06: Quản lý lịch**
+#### 3.1.2 Sơ đồ Use Case tổng thể
+```
+                    SmartWallet System
+    ┌─────────────────────────────────────────────────────────┐
+    │                                                         │
+    │  ┌─────────────────┐    ┌─────────────────────────────┐ │
+    │  │   Đăng nhập     │◄───┤                             │ │
+    │  └─────────────────┘    │                             │ │
+    │  ┌─────────────────┐    │                             │ │
+    │  │   Đăng ký       │◄───┤                             │ │
+    │  └─────────────────┘    │                             │ │
+    │  ┌─────────────────┐    │         User                │ │
+    │  │  Quản lý ví     │◄───┤      (Người dùng)          │ │
+    │  └─────────────────┘    │                             │ │
+    │  ┌─────────────────┐    │                             │ │
+    │  │ Chuyển tiền     │◄───┤                             │ │
+    │  └─────────────────┘    │                             │ │
+    │  ┌─────────────────┐    │                             │ │
+    │  │ Quản lý chi tiêu│◄───┤                             │ │
+    │  └─────────────────┘    │                             │ │
+    │  ┌─────────────────┐    │                             │ │
+    │  │ Xem thống kê    │◄───┤                             │ │
+    │  └─────────────────┘    │                             │ │
+    │  ┌─────────────────┐    │                             │ │
+    │  │ Quản lý lịch    │◄───┤                             │ │
+    │  └─────────────────┘    └─────────────────────────────┘ │
+    │                                                         │
+    └─────────────────────────────────────────────────────────┘
+```
 
 #### 3.1.3 Mô tả chi tiết Use Case
+**UC01: Đăng nhập/Đăng ký**
+- **Actor:** User
+- **Mô tả:** Xác thực người dùng vào hệ thống
+- **Luồng chính:**
+  1. User nhập thông tin đăng nhập
+  2. Hệ thống xác thực thông tin
+  3. Chuyển đến màn hình chính
+
 **UC02: Quản lý ví**
 - **Actor:** User
 - **Mô tả:** Người dùng quản lý các ví điện tử
@@ -130,143 +160,531 @@
   3. User chọn thao tác (thêm/sửa/xóa)
   4. Hệ thống thực hiện và cập nhật
 
+**Sơ đồ Activity cho UC02: Quản lý ví**
+```
+                    ┌─────────┐
+                    │  Start  │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │ Chọn    │
+                    │"Quản lý │
+                    │  ví"    │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │Hiển thị │
+                    │danh sách│
+                    │  ví     │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │ Chọn   │
+                    │thao tác │
+                    └────┬────┘
+                         │
+        ┌─────────────┼─────────────┐
+        │             │             │
+   ┌────▼────┐   ┌────▼────┐   ┌────▼────┐
+   │ Thêm ví  │   │ Sửa ví  │   │ Xóa ví  │
+   └────┬────┘   └────┬────┘   └────┬────┘
+        │             │             │
+        └─────────────┼─────────────┘
+                         │
+                    ┌────▼────┐
+                    │Thực hiện│
+                    │ và cập   │
+                    │ nhật     │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │   End   │
+                    └─────────┘
+```
+
+**Sơ đồ Sequence cho UC02.1: Thêm ví mới**
+```
+    User      WalletScreen   WalletProvider   WalletService   Database
+     │             │              │              │           │
+     │──nhấn "Thêm"─►│              │              │           │
+     │             │──hiển thị───►│              │           │
+     │             │    form      │              │           │
+     │──nhập thông tin►│              │              │           │
+     │             │──addWallet()─►│              │           │
+     │             │              │──save()──────►│           │
+     │             │              │              │──insert──►│
+     │             │              │              │           │
+     │             │              │              │◄─confirm─│
+     │             │              │◄──success───│           │
+     │             │◄──update UI──│              │           │
+     │◄──hiển thị───│              │              │           │
+     │   thành công   │              │              │           │
+```
+
+**Sơ đồ Sequence cho UC02.3: Xóa ví**
+```
+    User      WalletScreen   WalletProvider   WalletService   Database
+     │             │              │              │           │
+     │──nhấn "Xóa"──►│              │              │           │
+     │             │──hiển thị───►│              │           │
+     │             │  xác nhận    │              │           │
+     │──xác nhận────►│              │              │           │
+     │             │─deleteWallet()►│              │           │
+     │             │              │──delete()────►│           │
+     │             │              │              │──remove──►│
+     │             │              │              │           │
+     │             │              │              │◄─confirm─│
+     │             │              │◄──success───│           │
+     │             │◄──update UI──│              │           │
+     │◄──hiển thị───│              │              │           │
+     │   thành công   │              │              │           │
+```
+
+**Sơ đồ State cho Wallet**
+```
+    ┌─────────┐
+    │Tạo mới  │
+    └────┬────┘
+         │ create()
+    ┌────▼────┐
+ ┌──┤Hoạt động│──┐
+ │  └─────────┘  │
+ │               │ edit()
+ │  ┌─────────┐  │
+ └─►│Đang sửa │◄─┘
+    └────┬────┘
+         │ delete()
+    ┌────▼────┐
+    │ Đã xóa  │
+    └─────────┘
+```
+
+**UC03: Chuyển tiền**
+- **Actor:** User
+- **Mô tả:** Chuyển tiền giữa các ví
+- **Luồng chính:**
+  1. User chọn ví nguồn và ví đích
+  2. Nhập số tiền cần chuyển
+  3. Xác nhận giao dịch
+  4. Hệ thống thực hiện chuyển tiền
+
+**UC04: Quản lý chi tiêu**
+- **Actor:** User
+- **Mô tả:** Thêm, sửa, xóa các khoản chi tiêu
+- **Luồng chính:**
+  1. User chọn "Quản lý chi tiêu"
+  2. Hệ thống hiển thị danh sách chi tiêu
+  3. User chọn thao tác (thêm/sửa/xóa)
+  4. Hệ thống cập nhật và thống kê
+
+**UC05: Xem thống kê**
+- **Actor:** User
+- **Mô tả:** Xem báo cáo thống kê tài chính
+- **Luồng chính:**
+  1. User chọn "Thống kê"
+  2. Hệ thống tính toán dữ liệu
+  3. Hiển thị biểu đồ và báo cáo
+  4. User có thể lọc theo thời gian
+
 ### 3.2 Sơ đồ Class (Class Diagram)
-#### 3.2.1 Các lớp Model chính
+#### 3.2.1 Sơ đồ Class tổng thể
+```
+┌─────────────────────┐       ┌─────────────────────┐
+│        User         │       │    WalletProvider   │
+├─────────────────────┤       ├─────────────────────┤
+│ - id: String        │       │ - _wallets: List    │
+│ - name: String      │       │ - _selectedWallet   │
+│ - email: String     │   ┌───┤ - _walletService    │
+│ - phone: String     │   │   ├─────────────────────┤
+│ - avatar: String    │   │   │ + fetchWallets()    │
+│ - createdAt: DateTime│  │   │ + addWallet()       │
+├─────────────────────┤   │   │ + updateWallet()    │
+│ + fromJson()        │   │   │ + deleteWallet()    │
+│ + toJson()          │   │   │ + selectWallet()    │
+│ + copyWith()        │   │   │ + totalBalance      │
+└─────────────────────┘   │   └─────────────────────┘
+           │               │              │
+           │ 1           * │              │ uses
+           ▼               │              ▼
+┌─────────────────────┐    │   ┌─────────────────────┐
+│       Wallet        │◄───┘   │   WalletService     │
+├─────────────────────┤        ├─────────────────────┤
+│ - id: String        │        │ + getAllWallets()   │
+│ - name: String      │        │ + addWallet()       │
+│ - type: String      │        │ + updateWallet()    │
+│ - balance: double   │        │ + deleteWallet()    │
+│ - currency: String  │        │ + getWalletById()   │
+│ - bankName: String? │        └─────────────────────┘
+│ - accountNumber: String?│
+│ - isDefault: bool   │
+│ - color: String     │
+│ - icon: String      │
+├─────────────────────┤
+│ + fromJson()        │
+│ + toJson()          │
+│ + copyWith()        │
+└─────────────────────┘
+           │
+           │ 1
+           │
+           │ *
+           ▼
+┌─────────────────────┐
+│    Transaction      │
+├─────────────────────┤
+│ - id: String        │
+│ - type: String      │
+│ - amount: double    │
+│ - fromWalletId: String│
+│ - toWalletId: String?│
+│ - description: String│
+│ - createdAt: DateTime│
+│ - status: String    │
+├─────────────────────┤
+│ + fromJson()        │
+│ + toJson()          │
+└─────────────────────┘
 
-**Class: User**
-```
-+------------------+
-|      User        |
-+------------------+
-| - id: String     |
-| - name: String   |
-| - email: String  |
-| - phone: String  |
-| - avatar: String |
-| - createdAt: DateTime |
-+------------------+
-| + fromJson()     |
-| + toJson()       |
-| + copyWith()     |
-+------------------+
-```
-
-**Class: Wallet**
-```
-+------------------+
-|     Wallet       |
-+------------------+
-| - id: String     |
-| - name: String   |
-| - type: String   |
-| - balance: double|
-| - currency: String|
-| - bankName: String?|
-| - accountNumber: String?|
-| - isDefault: bool|
-| - color: String  |
-| - icon: String   |
-+------------------+
-| + fromJson()     |
-| + toJson()       |
-| + copyWith()     |
-+------------------+
-```
-
-**Class: Transaction**
-```
-+------------------+
-|   Transaction    |
-+------------------+
-| - id: String     |
-| - type: String   |
-| - amount: double |
-| - fromWalletId: String|
-| - toWalletId: String?|
-| - description: String|
-| - createdAt: DateTime|
-| - status: String |
-+------------------+
-| + fromJson()     |
-| + toJson()       |
-+------------------+
-```
-
-**Class: Expense**
-```
-+------------------+
-|     Expense      |
-+------------------+
-| - id: String     |
-| - title: String  |
-| - amount: double |
-| - date: DateTime |
-| - category: String|
-| - description: String|
-| - type: String   |
-+------------------+
-| + fromMap()      |
-| + toMap()        |
-+------------------+
+┌─────────────────────┐       ┌─────────────────────┐
+│      Expense        │       │  ExpenseProvider    │
+├─────────────────────┤       ├─────────────────────┤
+│ - id: String        │   ┌───┤ - _expenses: List   │
+│ - title: String     │   │   │ - _categories: List │
+│ - amount: double    │   │   ├─────────────────────┤
+│ - date: DateTime    │   │   │ + fetchExpenses()   │
+│ - category: String  │◄──┘   │ + addExpense()      │
+│ - description: String│       │ + updateExpense()   │
+│ - type: String      │       │ + deleteExpense()   │
+├─────────────────────┤       │ + getByCategory()   │
+│ + fromMap()         │       └─────────────────────┘
+│ + toMap()           │
+└─────────────────────┘
 ```
 
-#### 3.2.2 Các lớp Provider (State Management)
-
-**Class: WalletProvider**
-```
-+------------------+
-|  WalletProvider  |
-+------------------+
-| - _wallets: List<Wallet>|
-| - _selectedWallet: Wallet?|
-| - _walletService: WalletService|
-+------------------+
-| + fetchWallets() |
-| + addWallet()    |
-| + updateWallet() |
-| + deleteWallet() |
-| + selectWallet() |
-| + totalBalance: double|
-+------------------+
-```
-
-#### 3.2.3 Mối quan hệ giữa các lớp
-- User có nhiều Wallet (1:n)
-- Wallet có nhiều Transaction (1:n)
-- User có nhiều Expense (1:n)
-- WalletProvider sử dụng WalletService (Dependency)
+#### 3.2.2 Mối quan hệ giữa các lớp
+- **User** có nhiều **Wallet** (1:n)
+- **Wallet** có nhiều **Transaction** (1:n)
+- **User** có nhiều **Expense** (1:n)
+- **WalletProvider** sử dụng **WalletService** (Dependency)
+- **ExpenseProvider** quản lý **Expense** (Composition)
 
 ### 3.3 Sơ đồ tuần tự (Sequence Diagram)
 #### 3.3.1 Luồng đăng nhập
 ```
-User -> LoginScreen: nhập email/password
-LoginScreen -> AuthService: login(email, password)
-AuthService -> Database: validate credentials
-Database -> AuthService: return result
-AuthService -> LoginScreen: return success/error
-LoginScreen -> HomeScreen: navigate on success
+    User        LoginScreen     AuthService      Database
+     │               │               │              │
+     │──nhập email───►│               │              │
+     │   password     │               │              │
+     │               │──login()──────►│              │
+     │               │               │──validate────►│
+     │               │               │   credentials │
+     │               │               │◄─────result──│
+     │               │◄──success/────│              │
+     │               │     error     │              │
+     │◄──navigate────│               │              │
+     │   to Home     │               │              │
 ```
 
 #### 3.3.2 Luồng chuyển tiền
 ```
-User -> TransferScreen: chọn ví nguồn/đích, nhập số tiền
-TransferScreen -> WalletProvider: transfer()
-WalletProvider -> TransactionService: createTransaction()
-TransactionService -> WalletService: updateBalance()
-WalletService -> Database: save changes
-Database -> WalletService: confirm
-WalletService -> WalletProvider: notify success
-WalletProvider -> TransferScreen: update UI
+  User    TransferScreen  WalletProvider  TransactionService  WalletService  Database
+   │            │               │                │               │            │
+   │──chọn ví───►│               │                │               │            │
+   │ nhập tiền   │               │                │               │            │
+   │            │──transfer()───►│                │               │            │
+   │            │               │──createTransaction()──────────►│            │
+   │            │               │                │               │──save──────►│
+   │            │               │                │               │            │
+   │            │               │                │               │◄──confirm──│
+   │            │               │◄──────notify success──────────│            │
+   │            │◄──update UI───│                │               │            │
+   │◄──success──│               │                │               │            │
+   │            │──transfer()───►│                │               │            │
+   │            │               │──createTransaction()──────────►│            │
+   │            │               │                │               │──save──────►│
+   │            │               │                │               │            │
+   │            │               │                │               │◄──confirm──│
+   │            │               │◄──────notify success──────────│            │
+   │            │◄──update UI───│                │               │            │
+   │◄──success──│               │                │               │            │
 ```
 
-### 3.4 Thiết kế kiến trúc hệ thống
-#### 3.4.1 Kiến trúc tổng thể
+#### 3.3.3 Luồng thêm chi tiêu
+```
+    User      AddExpenseScreen   ExpenseProvider    Database
+     │              │                  │              │
+     │──nhập info───►│                  │              │
+     │              │──addExpense()────►│              │
+     │              │                  │──save────────►│
+     │              │                  │              │
+     │              │                  │◄──confirm────│
+     │              │◄──notify success─│              │
+     │◄──update UI──│                  │              │
+```
+
+#### 3.3.4 Luồng xem thống kê
+```
+    User      StatisticsScreen   ExpenseProvider   ChartService   Database
+     │              │                  │              │            │
+     │──chọn filter─►│                  │              │            │
+     │              │──getStatistics()─►│              │            │
+     │              │                  │──query──────►│            │
+     │              │                  │              │──fetch────►│
+     │              │                  │              │            │
+     │              │                  │              │◄──data────│
+     │              │                  │◄──process───│            │
+     │              │◄──chart data───│              │            │
+     │◄──hiển thị───│                  │              │            │
+     │   biểu đồ     │                  │              │            │
+```
+
+### 3.4 Sơ đồ Use Case chi tiết
+#### 3.4.1 Sơ đồ Use Case mở rộng cho Quản lý ví
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    Quản lý ví                     │
+                    └─────────────────────────────────────────────────────────┘
+                                           │
+                    ┌─────────────────────────┼────────────────────────────────┐
+                    │                         │                         │
+               ┌────▼────┐              ┌────▼────┐              ┌────▼────┐
+               │ Thêm ví  │              │ Sửa ví  │              │ Xóa ví  │
+               └─────────┘              └─────────┘              └─────────┘
+                    │                         │                         │
+                    │                         │                         │
+               ┌────▼────┐              ┌────▼────┐              ┌────▼────┐
+               │Validate  │              │Validate  │              │Xác nhận  │
+               │thông tin │              │thông tin │              │ xóa     │
+               └─────────┘              └─────────┘              └─────────┘
+                    │                         │                         │
+                    └─────────────────────────┼────────────────────────────────┘
+                                           │
+                                      ┌────▼────┐
+                                      │Cập nhật │
+                                      │database │
+                                      └─────────┘
+```
+
+### 3.5 Sơ đồ hoạt động (Activity Diagram)
+#### 3.5.1 Quy trình đăng nhập
+```
+                    ┌─────────┐
+                    │  Start  │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │ Nhập    │
+                    │email/pwd│
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │Validate │
+                    │ input   │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+               ┌────┤ Valid?  │
+               │    └─────────┘
+               │No        │Yes
+               │          │
+          ┌────▼────┐     │
+          │Hiển thị │     │
+          │  lỗi    │     │
+          └────┬────┘     │
+               │          │
+               └──────────┘
+                         │
+                    ┌────▼────┐
+                    │Gửi req  │
+                    │đăng nhập│
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │Xác thực │
+                    │ server  │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+               ┌────┤Success? │
+               │    └─────────┘
+               │No        │Yes
+               │          │
+          ┌────▼────┐     │
+          │Hiển thị │     │
+          │lỗi đăng │     │
+          │ nhập    │     │
+          └─────────┘     │
+                         │
+                    ┌────▼────┐
+                    │Lưu      │
+                    │session  │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │Chuyển   │
+                    │đến Home │
+                    └────┬────┘
+                         │
+                    ┌────▼────┐
+                    │   End   │
+                    └─────────┘
+```
+
+#### 3.5.2 Quy trình chuyển tiền
+```
+     ┌─────────┐
+     │  Start  │
+     └────┬────┘
+          │
+     ┌────▼────┐    ┌────────┐    ┌────────┐
+     │Chọn ví  │───►│Chọn ví │───►│Nhập số │
+     │ nguồn   │    │  đích  │    │  tiền  │
+     └─────────┘    └────────┘    └───┬────┘
+                                      │
+                                 ┌────▼────┐
+                                 │Validate │
+                                 │ số dư   │
+                                 └────┬────┘
+                                      │
+                                 ┌────▼────┐
+                            ┌────┤Đủ số dư?│
+                            │    └─────────┘
+                            │No       │Yes
+                            │         │
+                       ┌────▼────┐    │
+                       │Thông báo│    │
+                       │  lỗi    │    │
+                       └─────────┘    │
+                                      │
+                                 ┌────▼────┐
+                                 │Xác nhận │
+                                 │giao dịch│
+                                 └────┬────┘
+                                      │
+                                 ┌────▼────┐
+                                 │Tạo      │
+                                 │transaction│
+                                 └────┬────┘
+                                      │
+                                 ┌────▼────┐
+                                 │Cập nhật │
+                                 │ số dư   │
+                                 └────┬────┘
+                                      │
+                                 ┌────▼────┐
+                                 │Lưu lịch │
+                                 │  sử     │
+                                 └────┬────┘
+                                      │
+                                 ┌────▼────┐
+                                 │Thông báo│
+                                 │thành công│
+                                 └────┬────┘
+                                      │
+                                 ┌────▼────┐
+                                 │   End   │
+                                 └─────────┘
+```
+
+### 3.6 Sơ đồ trạng thái (State Diagram)
+#### 3.6.1 Trạng thái ứng dụng
+```
+                    ┌─────────────┐
+                    │ Khởi động   │
+                    └──────┬──────┘
+                           │
+                    ┌──────▼──────┐
+                    │   Loading   │
+                    └──────┬──────┘
+                           │
+                    ┌──────▼──────┐
+              ┌─────┤Chưa đăng nhập├─────┐
+              │     └─────────────┘     │
+              │                         │
+    ┌─────────▼─────────┐               │
+    │ Đăng nhập thành   │               │
+    │     công          │               │
+    └─────────┬─────────┘               │
+              │                         │
+       ┌──────▼──────┐                  │
+   ┌───┤Đã đăng nhập │                  │
+   │   └─────────────┘                  │
+   │                                    │
+   │   ┌─────────┐  ┌─────────────┐     │
+   ├──►│  Home   │◄─┤   Wallet    │     │
+   │   └────┬────┘  │ Management  │     │
+   │        │       └─────────────┘     │
+   │        │                          │
+   │   ┌────▼────┐  ┌─────────────┐     │
+   ├──►│Transfer │◄─┤ Statistics  │     │
+   │   └─────────┘  └─────────────┘     │
+   │                                    │
+   │        ┌─────────────┐             │
+   └────────┤ Đăng xuất   ├─────────────┘
+            └─────────────┘
+```
+
+#### 3.6.2 Trạng thái giao dịch
+```
+    ┌─────────┐
+    │Tạo mới  │
+    └────┬────┘
+         │
+    ┌────▼────┐
+    │ Pending │
+    └────┬────┘
+         │
+    ┌────▼────┐
+    │Đang xử lý│
+    └────┬────┘
+         │
+    ┌────▼────┐
+ ┌──┤ Kết quả │──┐
+ │  └─────────┘  │
+ │               │
+▼               ▼
+┌─────────┐ ┌─────────┐ ┌─────────┐
+│Thành công│ │Thất bại │ │ Hủy bỏ  │
+└────┬────┘ └────┬────┘ └────┬────┘
+     │           │           │
+     └───────────┼───────────┘
+                 │
+            ┌────▼────┐
+            │Hoàn thành│
+            └─────────┘
+```
+
+#### 3.6.3 Trạng thái ví điện tử
+```
+    ┌─────────┐
+    │Tạo mới  │
+    └────┬────┘
+         │
+    ┌────▼────┐
+ ┌──┤Hoạt động│──┐
+ │  └─────────┘  │
+ │               │
+ │  ┌─────────┐  │
+ └─►│Tạm khóa │◄─┘
+    └────┬────┘
+         │
+    ┌────▼────┐
+    │  Xóa    │
+    └────┬────┘
+         │
+    ┌────▼────┐
+    │ Đã xóa  │
+    └─────────┘
+```
+
+### 3.7 Thiết kế kiến trúc hệ thống
+#### 3.7.1 Kiến trúc tổng thể
 - **Pattern:** MVVM (Model-View-ViewModel) với Provider
 - **Presentation Layer:** Screens và Widgets (View)
 - **Business Logic Layer:** Providers (ViewModel) và Services
 - **Data Layer:** Models và Local Storage
 
-#### 3.4.2 Cấu trúc thư mục
+#### 3.7.2 Cấu trúc thư mục
 ```
 lib/
 ├── models/          # Data Models
