@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vi_dien_tu/providers/expense_provider.dart';
+import 'package:vi_dien_tu/providers/settings_provider.dart';
 import 'package:vi_dien_tu/models/expense.dart';
+import 'package:vi_dien_tu/utils/translations.dart';
 import 'package:intl/intl.dart';
 
 class AddExpenseScreen extends StatefulWidget {
@@ -80,7 +82,7 @@ class _AddExpenseScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xfff9f9e8),
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(),
@@ -166,15 +168,26 @@ class _AddExpenseScreenState
         unselectedLabelColor: Colors.grey[600],
         labelStyle: const TextStyle(
             fontWeight: FontWeight.w600),
-        tabs: const [
-          Tab(
-            icon:
-                Icon(Icons.remove_circle_outline),
-            text: 'Chi tiêu',
+        tabs: [
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Tab(
+                icon: const Icon(
+                    Icons.remove_circle_outline),
+                text: Translations.get('expense',
+                    settings.isEnglish),
+              );
+            },
           ),
-          Tab(
-            icon: Icon(Icons.add_circle_outline),
-            text: 'Thu nhập',
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Tab(
+                icon: const Icon(
+                    Icons.add_circle_outline),
+                text: Translations.get(
+                    'income', settings.isEnglish),
+              );
+            },
           ),
         ],
       ),
@@ -200,13 +213,18 @@ class _AddExpenseScreenState
       ),
       child: Column(
         children: [
-          Text(
-            'Số tiền',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Text(
+                Translations.get(
+                    'amount', settings.isEnglish),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              );
+            },
           ),
           const SizedBox(height: 12),
           TextFormField(
@@ -234,14 +252,22 @@ class _AddExpenseScreenState
               ),
             ),
             validator: (value) {
+              final settings =
+                  Provider.of<SettingsProvider>(
+                      context,
+                      listen: false);
               if (value == null ||
                   value.isEmpty) {
-                return 'Vui lòng nhập số tiền';
+                return Translations.get(
+                    'enter_amount',
+                    settings.isEnglish);
               }
               if (double.tryParse(value) ==
                       null ||
                   double.parse(value) <= 0) {
-                return 'Số tiền không hợp lệ';
+                return Translations.get(
+                    'invalid_amount',
+                    settings.isEnglish);
               }
               return null;
             },
@@ -272,19 +298,30 @@ class _AddExpenseScreenState
         crossAxisAlignment:
             CrossAxisAlignment.start,
         children: [
-          Text(
-            'Thông tin chi tiết',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Text(
+                settings.isEnglish
+                    ? 'Details'
+                    : 'Thông tin chi tiết',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              );
+            },
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _titleController,
             decoration: InputDecoration(
-              labelText: 'Tiêu đề',
+              labelText:
+                  Provider.of<SettingsProvider>(
+                              context)
+                          .isEnglish
+                      ? 'Title'
+                      : 'Tiêu đề',
               border: OutlineInputBorder(
                 borderRadius:
                     BorderRadius.circular(12),
@@ -292,9 +329,15 @@ class _AddExpenseScreenState
               prefixIcon: const Icon(Icons.title),
             ),
             validator: (value) {
+              final settings =
+                  Provider.of<SettingsProvider>(
+                      context,
+                      listen: false);
               if (value == null ||
                   value.isEmpty) {
-                return 'Vui lòng nhập tiêu đề';
+                return Translations.get(
+                    'enter_title',
+                    settings.isEnglish);
               }
               return null;
             },
@@ -303,7 +346,12 @@ class _AddExpenseScreenState
           TextFormField(
             controller: _descriptionController,
             decoration: InputDecoration(
-              labelText: 'Mô tả (tùy chọn)',
+              labelText:
+                  Provider.of<SettingsProvider>(
+                              context)
+                          .isEnglish
+                      ? 'Description (optional)'
+                      : 'Mô tả (tùy chọn)',
               border: OutlineInputBorder(
                 borderRadius:
                     BorderRadius.circular(12),
@@ -343,13 +391,18 @@ class _AddExpenseScreenState
         crossAxisAlignment:
             CrossAxisAlignment.start,
         children: [
-          Text(
-            'Danh mục',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Text(
+                Translations.get('category',
+                    settings.isEnglish),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              );
+            },
           ),
           const SizedBox(height: 16),
           Wrap(
@@ -405,19 +458,32 @@ class _AddExpenseScreenState
                             : Colors.grey[600],
                       ),
                       const SizedBox(width: 8),
-                      Text(
-                        category,
-                        style: TextStyle(
-                          color: isSelected
-                              ? (_selectedType ==
-                                      'Chi tiêu'
-                                  ? Colors.red
-                                  : Colors.green)
-                              : Colors.grey[700],
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.normal,
-                        ),
+                      Consumer<SettingsProvider>(
+                        builder: (context,
+                            settings, child) {
+                          return Text(
+                            Translations.get(
+                                category,
+                                settings
+                                    .isEnglish),
+                            style: TextStyle(
+                              color: isSelected
+                                  ? (_selectedType ==
+                                          'Chi tiêu'
+                                      ? Colors.red
+                                      : Colors
+                                          .green)
+                                  : Colors
+                                      .grey[700],
+                              fontWeight:
+                                  isSelected
+                                      ? FontWeight
+                                          .w600
+                                      : FontWeight
+                                          .normal,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
