@@ -69,7 +69,7 @@ class _StatisticsScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFFFF8DC),
       body: Consumer2<ExpenseProvider,
           WalletProvider>(
         builder: (context, expenseProvider,
@@ -123,20 +123,22 @@ class _StatisticsScreenState
             (sum, e) => sum + e.amount.abs());
 
     return SliverAppBar(
-      expandedHeight: 100,
+      expandedHeight: 120,
       floating: false,
       pinned: true,
-      backgroundColor: Colors.deepPurple,
+      backgroundColor: const Color(0xFFDA020E),
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.deepPurple,
-                Colors.purpleAccent
+                Color(0xFFDA020E),
+                Color(0xFFFF6B6B),
+                Color(0xFFFFCD00),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
+              stops: [0.0, 0.6, 1.0],
             ),
           ),
           child: SafeArea(

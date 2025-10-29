@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vi_dien_tu/models/expense.dart';
 import 'package:vi_dien_tu/providers/expense_provider.dart';
+import 'package:vi_dien_tu/providers/settings_provider.dart';
+import 'package:vi_dien_tu/widgets/edit_expense_form.dart';
+import 'package:vi_dien_tu/utils/translations.dart';
+import 'package:vi_dien_tu/utils/app_colors.dart';
 import 'package:intl/intl.dart';
 
 class ExpenseDetailScreen extends StatefulWidget {
@@ -56,11 +60,12 @@ class _ExpenseDetailScreenState
   Widget build(BuildContext context) {
     final isIncome =
         widget.expense.type == 'Thu nhập';
-    final color =
-        isIncome ? Colors.green : Colors.red;
+    final color = isIncome
+        ? AppColors.success
+        : AppColors.primary;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xfff9f9e8),
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(color, isIncome),
@@ -243,48 +248,80 @@ class _ExpenseDetailScreenState
         children: [
           Padding(
             padding: const EdgeInsets.all(20),
-            child: Text(
-              'Thông tin chi tiết',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+            child: Consumer<SettingsProvider>(
+              builder:
+                  (context, settings, child) {
+                return Text(
+                  Translations.get('view_details',
+                      settings.isEnglish),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                );
+              },
             ),
           ),
-          _buildDetailItem(
-            Icons.calendar_today_outlined,
-            'Ngày giao dịch',
-            DateFormat('dd/MM/yyyy')
-                .format(widget.expense.date),
-            Colors.blue,
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Column(
+                children: [
+                  _buildDetailItem(
+                    Icons.calendar_today_outlined,
+                    Translations.get(
+                        'transaction_date',
+                        settings.isEnglish),
+                    DateFormat('dd/MM/yyyy')
+                        .format(
+                            widget.expense.date),
+                    Colors.blue,
+                  ),
+                  _buildDetailItem(
+                    Icons.access_time_outlined,
+                    settings.isEnglish
+                        ? 'Time'
+                        : 'Thời gian',
+                    DateFormat('HH:mm').format(
+                        widget.expense.date),
+                    Colors.orange,
+                  ),
+                  _buildDetailItem(
+                    Icons.category_outlined,
+                    Translations.get('category',
+                        settings.isEnglish),
+                    widget.expense.category,
+                    Colors.purple,
+                  ),
+                ],
+              );
+            },
           ),
-          _buildDetailItem(
-            Icons.access_time_outlined,
-            'Thời gian',
-            DateFormat('HH:mm')
-                .format(widget.expense.date),
-            Colors.orange,
-          ),
-          _buildDetailItem(
-            Icons.category_outlined,
-            'Danh mục',
-            widget.expense.category,
-            Colors.purple,
-          ),
-          if (widget
-              .expense.description.isNotEmpty)
-            _buildDetailItem(
-              Icons.description_outlined,
-              'Mô tả',
-              widget.expense.description,
-              Colors.green,
-            ),
-          _buildDetailItem(
-            Icons.receipt_outlined,
-            'Mã giao dịch',
-            'TXN${widget.expense.id}',
-            Colors.grey,
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Column(
+                children: [
+                  if (widget.expense.description
+                      .isNotEmpty)
+                    _buildDetailItem(
+                      Icons.description_outlined,
+                      Translations.get(
+                          'description',
+                          settings.isEnglish),
+                      widget.expense.description,
+                      Colors.green,
+                    ),
+                  _buildDetailItem(
+                    Icons.receipt_outlined,
+                    settings.isEnglish
+                        ? 'Transaction ID'
+                        : 'Mã giao dịch',
+                    'TXN${widget.expense.id}',
+                    Colors.grey,
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -349,7 +386,7 @@ class _ExpenseDetailScreenState
           child: ElevatedButton.icon(
             onPressed: _editExpense,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(
                   vertical: 16),
@@ -360,10 +397,17 @@ class _ExpenseDetailScreenState
               elevation: 0,
             ),
             icon: const Icon(Icons.edit),
-            label: const Text(
-              'Chỉnh sửa',
-              style: TextStyle(
-                  fontWeight: FontWeight.w600),
+            label: Consumer<SettingsProvider>(
+              builder:
+                  (context, settings, child) {
+                return Text(
+                  Translations.get(
+                      'edit', settings.isEnglish),
+                  style: const TextStyle(
+                      fontWeight:
+                          FontWeight.w600),
+                );
+              },
             ),
           ),
         ),
@@ -372,7 +416,7 @@ class _ExpenseDetailScreenState
           child: ElevatedButton.icon(
             onPressed: _deleteExpense,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(
                   vertical: 16),
@@ -383,10 +427,17 @@ class _ExpenseDetailScreenState
               elevation: 0,
             ),
             icon: const Icon(Icons.delete),
-            label: const Text(
-              'Xóa',
-              style: TextStyle(
-                  fontWeight: FontWeight.w600),
+            label: Consumer<SettingsProvider>(
+              builder:
+                  (context, settings, child) {
+                return Text(
+                  Translations.get('delete',
+                      settings.isEnglish),
+                  style: const TextStyle(
+                      fontWeight:
+                          FontWeight.w600),
+                );
+              },
             ),
           ),
         ),
@@ -395,66 +446,16 @@ class _ExpenseDetailScreenState
   }
 
   void _editExpense() {
-    // Navigate to edit screen
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) =>
-          _buildEditBottomSheet(),
-    );
-  }
-
-  Widget _buildEditBottomSheet() {
-    return Container(
-      height: MediaQuery.of(context).size.height *
-          0.8,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20)),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditExpenseForm(
+            expense: widget.expense),
       ),
-      child: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 8),
-            width: 40,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius:
-                  BorderRadius.circular(2),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                const Text(
-                  'Chỉnh sửa giao dịch',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () =>
-                      Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-          ),
-          const Expanded(
-            child: Center(
-              child: Text(
-                  'Form chỉnh sửa sẽ được thêm vào đây'),
-            ),
-          ),
-        ],
-      ),
-    );
+    ).then((_) {
+      // Refresh the detail screen when returning from edit
+      setState(() {});
+    });
   }
 
   void _deleteExpense() {
@@ -464,14 +465,32 @@ class _ExpenseDetailScreenState
         shape: RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.circular(16)),
-        title: const Text('Xác nhận xóa'),
-        content: const Text(
-            'Bạn có chắc chắn muốn xóa giao dịch này không?'),
+        title: Consumer<SettingsProvider>(
+          builder: (context, settings, child) {
+            return Text(Translations.get(
+                'confirm_delete',
+                settings.isEnglish));
+          },
+        ),
+        content: Consumer<SettingsProvider>(
+          builder: (context, settings, child) {
+            return Text(Translations.get(
+                'delete_confirmation',
+                settings.isEnglish));
+          },
+        ),
         actions: [
           TextButton(
             onPressed: () =>
                 Navigator.pop(context),
-            child: const Text('Hủy'),
+            child: Consumer<SettingsProvider>(
+              builder:
+                  (context, settings, child) {
+                return Text(Translations.get(
+                    'cancel',
+                    settings.isEnglish));
+              },
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -485,29 +504,54 @@ class _ExpenseDetailScreenState
                       context); // Close dialog
                   Navigator.pop(
                       context); // Close detail screen
+                  final settings = Provider.of<
+                          SettingsProvider>(
+                      context,
+                      listen: false);
                   ScaffoldMessenger.of(context)
                       .showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Đã xóa giao dịch')),
+                    SnackBar(
+                      content: Text(
+                          Translations.get(
+                              'delete_success',
+                              settings
+                                  .isEnglish)),
+                      backgroundColor:
+                          Colors.green,
+                    ),
                   );
                 }
               } catch (e) {
                 if (mounted) {
                   Navigator.pop(context);
+                  final settings = Provider.of<
+                          SettingsProvider>(
+                      context,
+                      listen: false);
                   ScaffoldMessenger.of(context)
                       .showSnackBar(
                     SnackBar(
-                        content: Text('Lỗi: $e')),
+                      content: Text(
+                          '${Translations.get('error', settings.isEnglish)}: $e'),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               }
             },
             style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red),
-            child: const Text('Xóa',
-                style: TextStyle(
-                    color: Colors.white)),
+            child: Consumer<SettingsProvider>(
+              builder:
+                  (context, settings, child) {
+                return Text(
+                  Translations.get('delete',
+                      settings.isEnglish),
+                  style: const TextStyle(
+                      color: Colors.white),
+                );
+              },
+            ),
           ),
         ],
       ),

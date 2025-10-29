@@ -72,16 +72,18 @@ class _LoginScreenState extends State<LoginScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFFF8DC),
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
             colors: [
-              Colors.blue.shade600,
-              Colors.purple.shade600,
-              Colors.pink.shade400,
+              Color(0xFFDA020E), // Đỏ cờ VN
+              Color(0xFFFF6B6B), // Đỏ nhạt
+              Color(0xFFFFF8DC), // Cream
             ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            stops: [0.0, 0.3, 1.0],
           ),
         ),
         child: SafeArea(
@@ -166,52 +168,82 @@ class _LoginScreenState extends State<LoginScreen>
       builder: (context, settings, child) {
         return Column(
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.blue.shade400,
-                    Colors.purple.shade400
-                  ],
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue
-                        .withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFDA020E),
+                        Color(0xFFFF6B6B),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFDA020E).withOpacity(0.4),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.account_balance_wallet,
-                color: Colors.white,
-                size: 40,
-              ),
+                  child: const Icon(
+                    Icons.account_balance_wallet,
+                    color: Colors.white,
+                    size: 45,
+                  ),
+                ),
+                Positioned(
+                  top: 5,
+                  right: 5,
+                  child: Container(
+                    width: 25,
+                    height: 25,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFCD00),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.star,
+                      color: Color(0xFFDA020E),
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             Text(
-              Translations.get('welcome_back',
-                  settings.isEnglish),
+              '🇻🇳 ${Translations.get('welcome_back', settings.isEnglish)}',
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Color(0xFFDA020E),
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              Translations.get(
-                  'login_to_continue',
-                  settings.isEnglish),
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFCD00).withOpacity(0.3),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: const Color(0xFFDA020E),
+                  width: 1,
+                ),
               ),
-              textAlign: TextAlign.center,
+              child: Text(
+                'SmartWallet Việt Nam ⭐',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFFDA020E),
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         );
@@ -237,9 +269,9 @@ class _LoginScreenState extends State<LoginScreen>
             decoration: InputDecoration(
               labelText: Translations.get(
                   'email', settings.isEnglish),
-              prefixIcon: Icon(
+              prefixIcon: const Icon(
                   Icons.email_outlined,
-                  color: Colors.blue.shade600),
+                  color: Color(0xffef3c7b)),
               border: InputBorder.none,
               contentPadding:
                   const EdgeInsets.all(20),
@@ -281,8 +313,9 @@ class _LoginScreenState extends State<LoginScreen>
             decoration: InputDecoration(
               labelText: Translations.get(
                   'password', settings.isEnglish),
-              prefixIcon: Icon(Icons.lock_outline,
-                  color: Colors.blue.shade600),
+              prefixIcon: const Icon(
+                  Icons.lock_outline,
+                  color: Color(0xffef3c7b)),
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscureText
@@ -339,8 +372,8 @@ class _LoginScreenState extends State<LoginScreen>
             child: Text(
               Translations.get('forgot_password',
                   settings.isEnglish),
-              style: TextStyle(
-                color: Colors.blue.shade600,
+              style: const TextStyle(
+                color: Color(0xffef3c7b),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -357,18 +390,18 @@ class _LoginScreenState extends State<LoginScreen>
           width: double.infinity,
           height: 56,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [
-                Colors.blue.shade600,
-                Colors.purple.shade600
+                Color(0xffef3c7b),
+                Color(0xffff6b9d)
               ],
             ),
             borderRadius:
                 BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color:
-                    Colors.blue.withOpacity(0.3),
+                color: const Color(0xffef3c7b)
+                    .withOpacity(0.3),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
@@ -506,8 +539,8 @@ class _LoginScreenState extends State<LoginScreen>
               child: Text(
                 Translations.get('register_now',
                     settings.isEnglish),
-                style: TextStyle(
-                  color: Colors.blue.shade600,
+                style: const TextStyle(
+                  color: Color(0xffef3c7b),
                   fontWeight: FontWeight.bold,
                 ),
               ),
