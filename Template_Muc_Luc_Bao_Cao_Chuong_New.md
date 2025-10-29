@@ -929,64 +929,207 @@ class Expense {
 }
 ```
 
-*ExpenseProvider (providers/expense_provider.dart):*
-```dart
-class ExpenseProvider with ChangeNotifier {
-  List<Expense> _expenses = [];
-  final List<String> _categories = [
-    'Ăn uống', 'Mua sắm', 'Giải trí', 'Giáo dục',
-    'Y tế', 'Giao thông', 'Hóa đơn', 'Khác'
-  ];
+#### 3.5.1 Sơ đồ Lớp - Quản lý Chi tiêu
 
-  List<Expense> get expenses => _expenses;
-  List<String> get categories => _categories;
-
-  Future<void> addExpense(Expense expense) async {
-    _expenses.add(expense);
-    notifyListeners();
-  }
-
-  List<Expense> getExpensesByCategory(String category) {
-    return _expenses.where((expense) => expense.category == category).toList();
-  }
-
-  double getTotalExpenseByMonth(int month, int year) {
-    return _expenses
-        .where((expense) => 
-            expense.date.month == month && 
-            expense.date.year == year &&
-            expense.type == 'Chi tiêu')
-        .fold(0.0, (sum, expense) => sum + expense.amount);
-  }
-}
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           EXPENSE MODEL                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Expense                                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - id: String                                                               │
+│ - title: String                                                            │
+│ - amount: double                                                           │
+│ - date: DateTime                                                           │
+│ - category: String                                                         │
+│ - description: String                                                      │
+│ - type: String (income, expense)                                           │
+│ - walletId: String                                                         │
+│ - receipt: String?                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ + Expense({required params})                                               │
+│ + fromMap(Map<String, dynamic>) : Expense                                 │
+│ + toMap() : Map<String, dynamic>                                          │
+│ + validate() : bool                                                       │
+│ + isIncome() : bool                                                       │
+│ + isExpense() : bool                                                      │
+│ + getFormattedAmount() : String                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ manages
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        EXPENSE PROVIDER                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ExpenseProvider                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - _expenses: List<Expense>                                                 │
+│ - _categories: List<String>                                                │
+│ - _isLoading: bool                                                         │
+│ - _expenseService: ExpenseService                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ + expenses: List<Expense>                                                  │
+│ + categories: List<String>                                                 │
+│ + addExpense(Expense) : Future<void>                                       │
+│ + updateExpense(Expense) : Future<void>                                    │
+│ + deleteExpense(String) : Future<void>                                     │
+│ + getExpensesByCategory(String) : List<Expense>                            │
+│ + getExpensesByDateRange(DateTime, DateTime) : List<Expense>               │
+│ + getTotalExpenseByMonth(int, int) : double                                │
+│ + getCategoryAnalysis() : Map<String, double>                              │
+│ + searchExpenses(String) : List<Expense>                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │ uses
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         EXPENSE SERVICE                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ExpenseService                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ - _database: DatabaseHelper                                                │
+│ - _walletService: WalletService                                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ + createExpense(Expense) : Future<Expense>                                 │
+│ + updateExpense(Expense) : Future<void>                                    │
+│ + deleteExpense(String) : Future<void>                                     │
+│ + getExpensesByWallet(String) : Future<List<Expense>>                      │
+│ + getExpensesByCategory(String) : Future<List<Expense>>                    │
+│ + getCategoryStatistics(String, DateTime) : Future<Map<String, double>>    │
+│ + exportExpenses(DateTime, DateTime) : Future<String>                      │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### 3.5.1 Sơ đồ Use Case - Expense Management
+#### 3.5.2 Sơ đồ Trình Tự - Thêm Chi tiêu
+
 ```
-                    ┌─────────────────────────────────┐
-                    │     Expense Management          │
-                    ├─────────────────────────────────┤
-                    │                                 │
-                    │  ┌─────────────┐               │
-                    │  │ Thêm chi    │◄──────────────┤
-                    │  │ tiêu        │               │
-                    │  └─────────────┘               │
-                    │  ┌─────────────┐               │
-                    │  │ Phân loại   │◄──────────────┤
-                    │  │ chi tiêu    │               │     ┌─────────┐
-                    │  └─────────────┘               │◄────┤  User   │
-                    │  ┌─────────────┐               │     └─────────┘
-                    │  │ Chỉnh sửa   │◄──────────────┤
-                    │  │ chi tiêu    │               │
-                    │  └─────────────┘               │
-                    │  ┌─────────────┐               │
-                    │  │ Xóa chi tiêu│◄──────────────┤
-                    │  └─────────────┘               │
-                    │  ┌─────────────┐               │
-                    │  │ Tìm kiếm    │◄──────────────┤
-                    │  │ chi tiêu    │               │
-                    │  └─────────────┘               │
-                    └─────────────────────────────────┘
+User    ExpenseScreen  ExpenseProvider  ExpenseService  WalletService  Database
+ │           │                │              │               │            │
+ │──add──────►│                │              │               │            │
+ │ expense    │                │              │               │            │
+ │           │──show──────────►│              │               │            │
+ │           │  form()        │              │               │            │
+ │──input────►│                │              │               │            │
+ │ details    │                │              │               │            │
+ │           │──validate──────►│              │               │            │
+ │           │  input()       │              │               │            │
+ │           │                │──validate────►│               │            │
+ │           │                │  expense()   │               │            │
+ │           │                │              │──check────────►│            │
+ │           │                │              │  wallet()     │            │
+ │           │                │              │               │──query────►│
+ │           │                │              │               │◄─result───│
+ │           │                │              │◄─wallet───────│            │
+ │           │                │◄─valid───────│               │            │
+ │           │                │──create──────►│               │            │
+ │           │                │  expense()   │               │            │
+ │           │                │              │──update───────►│            │
+ │           │                │              │  balance()    │            │
+ │           │                │              │               │──update───►│
+ │           │                │              │               │◄─success──│
+ │           │                │              │──save─────────►│            │
+ │           │                │              │  expense()    │            │
+ │           │                │              │               │──insert───►│
+ │           │                │              │               │◄─saved────│
+ │           │                │              │◄─created──────│            │
+ │           │                │◄─success─────│               │            │
+ │           │◄─updated───────│              │               │            │
+ │◄─success──│                │              │               │            │
+```
+
+#### 3.5.3 Sơ đồ State - Expense Lifecycle
+
+```
+    ┌─────────────┐
+    │    Draft    │
+    │  (Nháp)     │
+    └──────┬──────┘
+           │ validate()
+    ┌──────▼──────┐
+    │ Validating  │
+    │(Đang kiểm   │
+    │ tra)        │
+    └──────┬──────┘
+           │ save()
+    ┌──────▼──────┐
+ ┌──┤   Saved     │
+ │  │ (Đã lưu)    │
+ │  └──────┬──────┘
+ │         │ edit()
+ │  ┌──────▼──────┐
+ │  │  Editing    │
+ │  │(Đang sửa)   │
+ │  └──────┬──────┘
+ │         │ update()
+ │         └─────────┐
+ │         │ delete()│
+ │  ┌──────▼──────┐  │
+ └─►│  Deleted    │◄─┘
+    │ (Đã xóa)    │
+    └─────────────┘
+```
+
+#### 3.5.4 Sơ đồ Activity - Quy trình Quản lý Chi tiêu
+
+```
+    ┌─────────────┐
+    │   Bắt đầu   │
+    └──────┬──────┘
+           │
+    ┌──────▼──────┐
+    │ Chọn loại   │
+    │ giao dịch   │
+    └──────┬──────┘
+           │
+    ┌──────▼──────┐
+    │ Nhập thông  │
+    │ tin chi tiêu│
+    └──────┬──────┘
+           │
+    ┌──────▼──────┐
+    │ Chọn danh   │◄─────┐
+    │ mục         │      │
+    └──────┬──────┘      │
+           │              │
+    ┌──────▼──────┐      │
+    │ Chọn ví     │      │
+    └──────┬──────┘      │
+           │              │
+    ┌──────▼──────┐      │
+    │ Kiểm tra    │      │
+    │ thông tin   │      │
+    └──────┬──────┘      │
+           │              │
+    ┌──────▼──────┐      │
+    │ Thông tin   │      │
+    │ hợp lệ?     │      │
+    └──────┬──────┘      │
+           │              │
+          Yes             │
+           │              │
+    ┌──────▼──────┐      │
+    │ Lưu chi tiêu│      │
+    └──────┬──────┘      │
+           │              │
+    ┌──────▼──────┐      │
+    │ Cập nhật    │      │
+    │ số dư ví    │      │
+    └──────┬──────┘      │
+           │              │
+    ┌──────▼──────┐      │
+    │ Thông báo   │      │
+    │ thành công  │      │
+    └──────┬──────┘      │
+           │              │
+    ┌──────▼──────┐      │
+    │   Kết thúc  │      │
+    └─────────────┘      │
+                         │
+           No            │
+    ┌──────▼──────┐      │
+    │ Hiển thị    │──────┘
+    │ lỗi         │
+    └─────────────┘
 ```
 
 ### 3.6 Chức năng Thống kê và Báo cáo
@@ -1019,6 +1162,12 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         color: color,
         value: entry.value.abs(),
         title: '${(entry.value / data.values.fold(0.0, (a, b) => a + b) * 100).toStringAsFixed(1)}%',
+        radius: 60,
+      );
+    }).toList();
+  }
+}
+```a + b) * 100).toStringAsFixed(1)}%',
         radius: 80,
       );
     }).toList();
