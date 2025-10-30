@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:vi_dien_tu/providers/expense_provider.dart';
+import 'package:vi_dien_tu/providers/settings_provider.dart';
 import 'package:vi_dien_tu/models/expense.dart';
 import 'package:vi_dien_tu/screens/expenses/expense_detail_screen.dart';
+import 'package:vi_dien_tu/utils/translations.dart';
 import 'package:intl/intl.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -113,15 +115,12 @@ class _CalendarScreenState
       expandedHeight: 120,
       floating: false,
       pinned: true,
-      backgroundColor: Colors.indigo,
+      backgroundColor: Color(0xffef3c7b),
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Colors.indigo,
-                Colors.indigoAccent
-              ],
+              colors: [Color(0xffef3c7b)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -135,12 +134,19 @@ class _CalendarScreenState
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Tháng ${_focusedDay.month}/${_focusedDay.year}',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
+                  Consumer<SettingsProvider>(
+                    builder: (context, settings,
+                        child) {
+                      return Text(
+                        settings.isEnglish
+                            ? 'Month ${_focusedDay.month}/${_focusedDay.year}'
+                            : 'Tháng ${_focusedDay.month}/${_focusedDay.year}',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -197,11 +203,11 @@ class _CalendarScreenState
             holidayTextStyle: const TextStyle(
                 color: Colors.red),
             selectedDecoration: BoxDecoration(
-              color: Colors.indigo,
+              color: Color(0xffef3c7b),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.indigo
+                  color: Color(0xffef3c7b)
                       .withOpacity(0.3),
                   spreadRadius: 0,
                   blurRadius: 8,
@@ -210,8 +216,7 @@ class _CalendarScreenState
               ],
             ),
             todayDecoration: BoxDecoration(
-              color:
-                  Colors.indigo.withOpacity(0.5),
+              color: Color(0xffef3c7b),
               shape: BoxShape.circle,
             ),
             markerDecoration: const BoxDecoration(
@@ -225,7 +230,7 @@ class _CalendarScreenState
             titleCentered: true,
             formatButtonShowsNext: false,
             formatButtonDecoration: BoxDecoration(
-              color: Colors.indigo,
+              color: Color(0xffef3c7b),
               borderRadius: BorderRadius.all(
                   Radius.circular(12)),
             ),
@@ -280,31 +285,49 @@ class _CalendarScreenState
         crossAxisAlignment:
             CrossAxisAlignment.start,
         children: [
-          Text(
-            'Tổng quan tháng ${_focusedDay.month}',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Text(
+                settings.isEnglish
+                    ? 'Month ${_focusedDay.month} Overview'
+                    : 'Tổng quan tháng ${_focusedDay.month}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: _buildOverviewItem(
-                  'Thu nhập',
-                  totalIncome,
-                  Icons.trending_up,
-                  Colors.green,
+                child: Consumer<SettingsProvider>(
+                  builder:
+                      (context, settings, child) {
+                    return _buildOverviewItem(
+                      Translations.get('income',
+                          settings.isEnglish),
+                      totalIncome,
+                      Icons.trending_up,
+                      Colors.green,
+                    );
+                  },
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildOverviewItem(
-                  'Chi tiêu',
-                  totalExpense,
-                  Icons.trending_down,
-                  Colors.red,
+                child: Consumer<SettingsProvider>(
+                  builder:
+                      (context, settings, child) {
+                    return _buildOverviewItem(
+                      Translations.get('expense',
+                          settings.isEnglish),
+                      totalExpense,
+                      Icons.trending_down,
+                      Colors.red,
+                    );
+                  },
                 ),
               ),
             ],
@@ -322,12 +345,18 @@ class _CalendarScreenState
             ),
             child: Column(
               children: [
-                Text(
-                  'Số dư',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                Consumer<SettingsProvider>(
+                  builder:
+                      (context, settings, child) {
+                    return Text(
+                      Translations.get('balance',
+                          settings.isEnglish),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -407,16 +436,24 @@ class _CalendarScreenState
               children: [
                 Icon(
                   Icons.event_note,
-                  color: Colors.indigo,
+                  color: Color(0xffef3c7b),
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Giao dịch ngày ${DateFormat('dd/MM/yyyy').format(_selectedDay ?? DateTime.now())}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Consumer<SettingsProvider>(
+                  builder:
+                      (context, settings, child) {
+                    return Text(
+                      settings.isEnglish
+                          ? 'Transactions on ${DateFormat('dd/MM/yyyy').format(_selectedDay ?? DateTime.now())}'
+                          : 'Giao dịch ngày ${DateFormat('dd/MM/yyyy').format(_selectedDay ?? DateTime.now())}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight:
+                            FontWeight.bold,
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -437,13 +474,22 @@ class _CalendarScreenState
                           color: Colors.grey[400],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Không có giao dịch nào',
-                          style: TextStyle(
-                            color:
-                                Colors.grey[600],
-                            fontSize: 16,
-                          ),
+                        Consumer<
+                            SettingsProvider>(
+                          builder: (context,
+                              settings, child) {
+                            return Text(
+                              Translations.get(
+                                  'no_transactions_date',
+                                  settings
+                                      .isEnglish),
+                              style: TextStyle(
+                                color: Colors
+                                    .grey[600],
+                                fontSize: 16,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
