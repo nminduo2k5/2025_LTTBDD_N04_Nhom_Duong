@@ -15,11 +15,13 @@ class QRService {
       'recipientName': recipientName,
       'amount': amount,
       'description': description ?? '',
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'timestamp':
+          DateTime.now().millisecondsSinceEpoch,
       'qrId': _generateQRId(),
     };
-    
-    return base64Encode(utf8.encode(jsonEncode(qrData)));
+
+    return base64Encode(
+        utf8.encode(jsonEncode(qrData)));
   }
 
   // Tạo mã QR cho chuyển tiền
@@ -35,33 +37,42 @@ class QRService {
       'recipientName': recipientName,
       'bankCode': bankCode,
       'accountNumber': accountNumber,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'timestamp':
+          DateTime.now().millisecondsSinceEpoch,
       'qrId': _generateQRId(),
     };
-    
-    return base64Encode(utf8.encode(jsonEncode(qrData)));
+
+    return base64Encode(
+        utf8.encode(jsonEncode(qrData)));
   }
 
   // Giải mã QR code
-  static Map<String, dynamic>? decodeQR(String qrCode) {
+  static Map<String, dynamic>? decodeQR(
+      String qrCode) {
     try {
       final decodedBytes = base64Decode(qrCode);
-      final decodedString = utf8.decode(decodedBytes);
-      final qrData = jsonDecode(decodedString) as Map<String, dynamic>;
-      
+      final decodedString =
+          utf8.decode(decodedBytes);
+      final qrData = jsonDecode(decodedString)
+          as Map<String, dynamic>;
+
       // Kiểm tra tính hợp lệ của QR (ví dụ: thời gian hết hạn)
-      final timestamp = qrData['timestamp'] as int?;
+      final timestamp =
+          qrData['timestamp'] as int?;
       if (timestamp != null) {
-        final qrTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+        final qrTime =
+            DateTime.fromMillisecondsSinceEpoch(
+                timestamp);
         final now = DateTime.now();
-        final difference = now.difference(qrTime).inMinutes;
-        
+        final difference =
+            now.difference(qrTime).inMinutes;
+
         // QR code hết hạn sau 30 phút
         if (difference > 30) {
           throw Exception('Mã QR đã hết hạn');
         }
       }
-      
+
       return qrData;
     } catch (e) {
       return null;
@@ -81,11 +92,13 @@ class QRService {
       'userName': userName,
       'phoneNumber': phoneNumber,
       'email': email,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
+      'timestamp':
+          DateTime.now().millisecondsSinceEpoch,
       'qrId': _generateQRId(),
     };
-    
-    return base64Encode(utf8.encode(jsonEncode(qrData)));
+
+    return base64Encode(
+        utf8.encode(jsonEncode(qrData)));
   }
 
   // Kiểm tra loại QR
@@ -97,26 +110,33 @@ class QRService {
   // Tạo ID duy nhất cho QR
   static String _generateQRId() {
     final random = Random();
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return List.generate(8, (index) => chars[random.nextInt(chars.length)]).join();
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return List.generate(
+        8,
+        (index) => chars[
+            random.nextInt(chars.length)]).join();
   }
 
   // Validate QR data
-  static bool validateQRData(Map<String, dynamic> qrData) {
+  static bool validateQRData(
+      Map<String, dynamic> qrData) {
     final type = qrData['type'] as String?;
-    
+
     switch (type) {
       case 'payment':
-        return qrData.containsKey('recipientId') &&
-               qrData.containsKey('recipientName') &&
-               qrData.containsKey('amount');
+        return qrData
+                .containsKey('recipientId') &&
+            qrData.containsKey('recipientName') &&
+            qrData.containsKey('amount');
       case 'transfer':
-        return qrData.containsKey('recipientId') &&
-               qrData.containsKey('recipientName');
+        return qrData
+                .containsKey('recipientId') &&
+            qrData.containsKey('recipientName');
       case 'personal':
         return qrData.containsKey('userId') &&
-               qrData.containsKey('userName') &&
-               qrData.containsKey('phoneNumber');
+            qrData.containsKey('userName') &&
+            qrData.containsKey('phoneNumber');
       default:
         return false;
     }

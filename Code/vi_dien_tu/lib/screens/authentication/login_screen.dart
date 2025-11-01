@@ -273,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen>
                   'email', settings.isEnglish),
               prefixIcon: const Icon(
                   Icons.email_outlined,
-                  color: Color(0xffef3c7b)),
+                  color: Color(0xFFDA020E)),
               border: InputBorder.none,
               contentPadding:
                   const EdgeInsets.all(20),
@@ -317,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen>
                   'password', settings.isEnglish),
               prefixIcon: const Icon(
                   Icons.lock_outline,
-                  color: Color(0xffef3c7b)),
+                  color: Color(0xFFDA020E)),
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscureText
@@ -375,7 +375,7 @@ class _LoginScreenState extends State<LoginScreen>
               Translations.get('forgot_password',
                   settings.isEnglish),
               style: const TextStyle(
-                color: Color(0xffef3c7b),
+                color: Color(0xFFDA020E),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -394,15 +394,15 @@ class _LoginScreenState extends State<LoginScreen>
           decoration: BoxDecoration(
             gradient: const LinearGradient(
               colors: [
-                Color(0xffef3c7b),
-                Color(0xffff6b9d)
+                Color(0xFFDA020E),
+                Color(0xFFFF6B6B)
               ],
             ),
             borderRadius:
                 BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xffef3c7b)
+                color: const Color(0xFFDA020E)
                     .withOpacity(0.3),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
@@ -542,7 +542,7 @@ class _LoginScreenState extends State<LoginScreen>
                 Translations.get('register_now',
                     settings.isEnglish),
                 style: const TextStyle(
-                  color: Color(0xffef3c7b),
+                  color: Color(0xFFDA020E),
                   fontWeight: FontWeight.bold,
                 ),
               ),
