@@ -57,12 +57,12 @@ class ApiService {
     ),
     Expense(
       id: '6',
-      title: 'Đi nhậu',
+      title: 'Ăn cưới vợ cũ👰',
       amount: -350000,
       category: 'Ăn uống',
       date: DateTime.now()
           .subtract(Duration(days: 3)),
-      description: 'Tiệc công ty',
+      description: 'Chúc em hạnh phúc👰',
       type: 'Chi tiêu',
     ),
 
@@ -229,6 +229,8 @@ class ApiService {
       description: '2 đêm tại Đà Nẵng',
       type: 'Chi tiêu',
     ),
+
+
   ];
 
   Future<List<Expense>> getAllExpenses() async {
