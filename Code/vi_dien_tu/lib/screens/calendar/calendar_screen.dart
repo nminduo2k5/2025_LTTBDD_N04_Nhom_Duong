@@ -80,7 +80,7 @@ class _CalendarScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFFFF8DC),
       body: Consumer<ExpenseProvider>(
         builder:
             (context, expenseProvider, child) {
@@ -115,14 +115,19 @@ class _CalendarScreenState
       expandedHeight: 120,
       floating: false,
       pinned: true,
-      backgroundColor: Color(0xffef3c7b),
+      backgroundColor: const Color(0xFFDA020E),
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xffef3c7b)],
+              colors: [
+                Color(0xFFDA020E),
+                Color(0xFFFF6B6B),
+                Color(0xFFFFCD00),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
+              stops: [0.0, 0.6, 1.0],
             ),
           ),
           child: SafeArea(
@@ -203,11 +208,11 @@ class _CalendarScreenState
             holidayTextStyle: const TextStyle(
                 color: Colors.red),
             selectedDecoration: BoxDecoration(
-              color: Color(0xffef3c7b),
+              color: const Color(0xFFDA020E),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Color(0xffef3c7b)
+                  color: const Color(0xFFDA020E)
                       .withOpacity(0.3),
                   spreadRadius: 0,
                   blurRadius: 8,
@@ -215,8 +220,8 @@ class _CalendarScreenState
                 ),
               ],
             ),
-            todayDecoration: BoxDecoration(
-              color: Color(0xffef3c7b),
+            todayDecoration: const BoxDecoration(
+              color: Color(0xFFDA020E),
               shape: BoxShape.circle,
             ),
             markerDecoration: const BoxDecoration(
@@ -230,7 +235,7 @@ class _CalendarScreenState
             titleCentered: true,
             formatButtonShowsNext: false,
             formatButtonDecoration: BoxDecoration(
-              color: Color(0xffef3c7b),
+              color: Color(0xFFDA020E),
               borderRadius: BorderRadius.all(
                   Radius.circular(12)),
             ),
@@ -436,7 +441,7 @@ class _CalendarScreenState
               children: [
                 Icon(
                   Icons.event_note,
-                  color: Color(0xffef3c7b),
+                  color: const Color(0xFFDA020E),
                   size: 24,
                 ),
                 const SizedBox(width: 8),

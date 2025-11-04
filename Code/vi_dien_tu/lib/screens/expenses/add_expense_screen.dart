@@ -82,7 +82,7 @@ class _AddExpenseScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff9f9e8),
+      backgroundColor: const Color(0xFFFFF8DC),
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(),
@@ -117,23 +117,28 @@ class _AddExpenseScreenState
       expandedHeight: 120,
       floating: false,
       pinned: true,
-      backgroundColor: _selectedType == 'Chi tiêu'
-          ? Colors.red
-          : Colors.green,
+      backgroundColor: const Color(0xFFDA020E),
       flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-            'Thêm ${_selectedType.toLowerCase()}'),
+        title: Consumer<SettingsProvider>(
+          builder: (context, settings, child) {
+            return Text(
+              settings.isEnglish 
+                ? 'Add ${_selectedType == 'Chi tiêu' ? 'Expense' : 'Income'}'
+                : 'Thêm ${_selectedType.toLowerCase()}'
+            );
+          },
+        ),
         background: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: _selectedType == 'Chi tiêu'
-                  ? [Colors.red, Colors.redAccent]
-                  : [
-                      Colors.green,
-                      Colors.greenAccent
-                    ],
+              colors: [
+                Color(0xFFDA020E),
+                Color(0xFFFF6B6B),
+                Color(0xFFFFCD00),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
+              stops: [0.0, 0.6, 1.0],
             ),
           ),
         ),
@@ -161,7 +166,7 @@ class _AddExpenseScreenState
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: _selectedType == 'Chi tiêu'
-              ? Colors.red
+              ? const Color(0xFFDA020E)
               : Colors.green,
         ),
         labelColor: Colors.white,
@@ -235,7 +240,7 @@ class _AddExpenseScreenState
               fontSize: 32,
               fontWeight: FontWeight.bold,
               color: _selectedType == 'Chi tiêu'
-                  ? Colors.red
+                  ? const Color(0xFFDA020E)
                   : Colors.green,
             ),
             decoration: InputDecoration(
@@ -426,7 +431,7 @@ class _AddExpenseScreenState
                     color: isSelected
                         ? (_selectedType ==
                                     'Chi tiêu'
-                                ? Colors.red
+                                ? const Color(0xFFDA020E)
                                 : Colors.green)
                             .withOpacity(0.1)
                         : Colors.grey[100],
@@ -436,7 +441,7 @@ class _AddExpenseScreenState
                       color: isSelected
                           ? (_selectedType ==
                                   'Chi tiêu'
-                              ? Colors.red
+                              ? const Color(0xFFDA020E)
                               : Colors.green)
                           : Colors.transparent,
                       width: 2,
@@ -453,7 +458,7 @@ class _AddExpenseScreenState
                         color: isSelected
                             ? (_selectedType ==
                                     'Chi tiêu'
-                                ? Colors.red
+                                ? const Color(0xFFDA020E)
                                 : Colors.green)
                             : Colors.grey[600],
                       ),
@@ -470,7 +475,7 @@ class _AddExpenseScreenState
                               color: isSelected
                                   ? (_selectedType ==
                                           'Chi tiêu'
-                                      ? Colors.red
+                                      ? const Color(0xFFDA020E)
                                       : Colors
                                           .green)
                                   : Colors
@@ -525,12 +530,16 @@ class _AddExpenseScreenState
               crossAxisAlignment:
                   CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Ngày giao dịch',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                Consumer<SettingsProvider>(
+                  builder: (context, settings, child) {
+                    return Text(
+                      Translations.get('transaction_date', settings.isEnglish),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -546,7 +555,11 @@ class _AddExpenseScreenState
           ),
           TextButton(
             onPressed: _selectDate,
-            child: const Text('Thay đổi'),
+            child: Consumer<SettingsProvider>(
+              builder: (context, settings, child) {
+                return Text(settings.isEnglish ? 'Change' : 'Thay đổi');
+              },
+            ),
           ),
         ],
       ),
@@ -564,7 +577,7 @@ class _AddExpenseScreenState
         style: ElevatedButton.styleFrom(
           backgroundColor:
               _selectedType == 'Chi tiêu'
-                  ? Colors.red
+                  ? const Color(0xFFDA020E)
                   : Colors.green,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(
@@ -586,12 +599,18 @@ class _AddExpenseScreenState
                           Color>(Colors.white),
                 ),
               )
-            : Text(
-                'Lưu ${_selectedType.toLowerCase()}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+            : Consumer<SettingsProvider>(
+                builder: (context, settings, child) {
+                  return Text(
+                    settings.isEnglish 
+                      ? 'Save ${_selectedType == 'Chi tiêu' ? 'Expense' : 'Income'}'
+                      : 'Lưu ${_selectedType.toLowerCase()}',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  );
+                },
               ),
       ),
     );
@@ -641,24 +660,29 @@ class _AddExpenseScreenState
 
       if (mounted) {
         Navigator.pop(context);
+        final settings = Provider.of<SettingsProvider>(context, listen: false);
         ScaffoldMessenger.of(context)
             .showSnackBar(
           SnackBar(
             content: Text(
-                'Thêm ${_selectedType.toLowerCase()} thành công'),
+              settings.isEnglish 
+                ? '${_selectedType == 'Chi tiêu' ? 'Expense' : 'Income'} added successfully'
+                : 'Thêm ${_selectedType.toLowerCase()} thành công'
+            ),
             backgroundColor:
                 _selectedType == 'Chi tiêu'
-                    ? Colors.red
+                    ? const Color(0xFFDA020E)
                     : Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final settings = Provider.of<SettingsProvider>(context, listen: false);
         ScaffoldMessenger.of(context)
             .showSnackBar(
           SnackBar(
-            content: Text('Lỗi: $e'),
+            content: Text(settings.isEnglish ? 'Error: $e' : 'Lỗi: $e'),
             backgroundColor: Colors.red,
           ),
         );

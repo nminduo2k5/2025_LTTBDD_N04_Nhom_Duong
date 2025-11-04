@@ -54,7 +54,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff9f9e8),
+      backgroundColor: const Color(0xFFFFF8DC),
       appBar: AppBar(
         title: Consumer<SettingsProvider>(
           builder: (context, settings, child) {
@@ -64,8 +64,17 @@ class SettingsScreen extends StatelessWidget {
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: const Color(0xffef3c7b),
+        backgroundColor: const Color(0xFFDA020E),
         foregroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFDA020E), Color(0xFFFF6B6B)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: Consumer<SettingsProvider>(
@@ -81,7 +90,7 @@ class SettingsScreen extends StatelessWidget {
                   trailing: Switch(
                     value: settings.isDarkMode,
                     activeColor:
-                        const Color(0xffef3c7b),
+                        const Color(0xFFDA020E),
                     onChanged: (value) =>
                         settings.toggleTheme(),
                   ),
@@ -115,7 +124,7 @@ class SettingsScreen extends StatelessWidget {
                   trailing: Switch(
                     value: settings.isEnglish,
                     activeColor:
-                        const Color(0xffef3c7b),
+                        const Color(0xFFDA020E),
                     onChanged: (value) =>
                         settings.toggleLanguage(),
                   ),

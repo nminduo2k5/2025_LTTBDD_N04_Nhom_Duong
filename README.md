@@ -7,7 +7,7 @@
 - **Nhóm:** 2025_LTTBDD_N04_Nhom_Duong
 
 ## 📱 Giới Thiệu Đề Tài
-**Tên đề tài:** Ứng dụng di động Ví điện tử SmartWallet
+**Tên đề tài:** SmartWallet- Ứng dụng ví điện tử thông minh
 
 SmartWallet là một ứng dụng ví điện tử hiện đại được phát triển bằng Flutter, cung cấp giải pháp quản lý tài chính cá nhân toàn diện với giao diện thân thiện và các tính năng thông minh.
 

@@ -65,7 +65,7 @@ class _ExpenseDetailScreenState
         : AppColors.primary;
 
     return Scaffold(
-      backgroundColor: const Color(0xfff9f9e8),
+      backgroundColor: const Color(0xFFFFF8DC),
       body: CustomScrollView(
         slivers: [
           _buildSliverAppBar(color, isIncome),
@@ -386,7 +386,7 @@ class _ExpenseDetailScreenState
           child: ElevatedButton.icon(
             onPressed: _editExpense,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: const Color(0xFFDA020E),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(
                   vertical: 16),
@@ -416,7 +416,7 @@ class _ExpenseDetailScreenState
           child: ElevatedButton.icon(
             onPressed: _deleteExpense,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+              backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(
                   vertical: 16),

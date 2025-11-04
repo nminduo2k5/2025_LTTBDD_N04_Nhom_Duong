@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:vi_dien_tu/providers/expense_provider.dart';
 import 'package:vi_dien_tu/providers/wallet_provider.dart';
+import 'package:vi_dien_tu/providers/settings_provider.dart';
+import 'package:vi_dien_tu/utils/translations.dart';
 import 'package:intl/intl.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -70,20 +72,26 @@ class _StatisticsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8DC),
-      body: Consumer2<ExpenseProvider,
-          WalletProvider>(
+      body: Consumer3<ExpenseProvider,
+          WalletProvider, SettingsProvider>(
         builder: (context, expenseProvider,
-            walletProvider, child) {
+            walletProvider, settings, child) {
           return CustomScrollView(
             slivers: [
               _buildSliverAppBar(expenseProvider,
-                  walletProvider),
+                  walletProvider, settings),
               SliverToBoxAdapter(
-                  child: _buildPeriodSelector()),
+                  child: _buildPeriodSelector(settings)),
               SliverToBoxAdapter(
                   child: _buildOverviewCards(
                       expenseProvider,
-                      walletProvider)),
+                      walletProvider, settings)),
+              // Danh sách giao dịch
+              SliverToBoxAdapter(
+                child: _buildTransactionsList(
+                    expenseProvider, settings),
+              ),
+              // Biểu đồ chi tiêu
               SliverToBoxAdapter(
                 child: SizedBox(
                   height: 400,
@@ -91,18 +99,18 @@ class _StatisticsScreenState
                     controller: _tabController,
                     children: [
                       _buildCategoryChart(
-                          expenseProvider),
+                          expenseProvider, settings),
                       _buildTrendChart(
-                          expenseProvider),
+                          expenseProvider, settings),
                       _buildComparisonChart(
-                          expenseProvider),
+                          expenseProvider, settings),
                     ],
                   ),
                 ),
               ),
               SliverToBoxAdapter(
                   child: _buildInsights(
-                      expenseProvider)),
+                      expenseProvider, settings)),
             ],
           );
         },
@@ -112,7 +120,8 @@ class _StatisticsScreenState
 
   Widget _buildSliverAppBar(
       ExpenseProvider expenseProvider,
-      WalletProvider walletProvider) {
+      WalletProvider walletProvider,
+      SettingsProvider settings) {
     final totalIncome = expenseProvider.expenses
         .where((e) => e.type == 'Thu nhập')
         .fold(0.0,
@@ -160,27 +169,31 @@ class _StatisticsScreenState
         indicatorColor: Colors.white,
         labelColor: Colors.white,
         unselectedLabelColor: Colors.white70,
-        tabs: const [
-          Tab(text: 'Danh mục'),
-          Tab(text: 'Xu hướng'),
-          Tab(text: 'So sánh'),
+        tabs: [
+          Tab(text: Provider.of<SettingsProvider>(context).isEnglish ? 'Categories' : 'Danh mục'),
+          Tab(text: Provider.of<SettingsProvider>(context).isEnglish ? 'Trends' : 'Xu hướng'),
+          Tab(text: Provider.of<SettingsProvider>(context).isEnglish ? 'Compare' : 'So sánh'),
         ],
       ),
     );
   }
 
-  Widget _buildPeriodSelector() {
+  Widget _buildPeriodSelector(SettingsProvider settings) {
     return Container(
       margin: const EdgeInsets.all(16),
       child: Row(
         children: [
-          Text(
-            'Thời gian:',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Text(
+                settings.isEnglish ? 'Period:' : 'Thời gian:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              );
+            },
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -188,13 +201,21 @@ class _StatisticsScreenState
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildPeriodChip(
-                      'week', 'Tuần'),
-                  _buildPeriodChip(
-                      'month', 'Tháng'),
-                  _buildPeriodChip(
-                      'quarter', 'Quý'),
-                  _buildPeriodChip('year', 'Năm'),
+                  Consumer<SettingsProvider>(
+                    builder: (context, settings, child) {
+                      return Row(
+                        children: [
+                          _buildPeriodChip(
+                              'week', settings.isEnglish ? 'Week' : 'Tuần'),
+                          _buildPeriodChip(
+                              'month', settings.isEnglish ? 'Month' : 'Tháng'),
+                          _buildPeriodChip(
+                              'quarter', settings.isEnglish ? 'Quarter' : 'Quý'),
+                          _buildPeriodChip('year', settings.isEnglish ? 'Year' : 'Năm'),
+                        ],
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -228,7 +249,8 @@ class _StatisticsScreenState
 
   Widget _buildOverviewCards(
       ExpenseProvider expenseProvider,
-      WalletProvider walletProvider) {
+      WalletProvider walletProvider,
+      SettingsProvider settings) {
     final totalIncome = expenseProvider.expenses
         .where((e) => e.type == 'Thu nhập')
         .fold(0.0,
@@ -244,23 +266,31 @@ class _StatisticsScreenState
       child: Row(
         children: [
           Expanded(
-            child: _buildOverviewCard(
-              'Số dư hiện tại',
-              _formatCurrency(
-                  walletProvider.totalBalance),
-              Icons.account_balance_wallet,
-              Colors.blue,
+            child: Consumer<SettingsProvider>(
+              builder: (context, settings, child) {
+                return _buildOverviewCard(
+                  settings.isEnglish ? 'Current Balance' : 'Số dư hiện tại',
+                  _formatCurrency(
+                      walletProvider.totalBalance),
+                  Icons.account_balance_wallet,
+                  Colors.blue,
+                );
+              },
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: _buildOverviewCard(
-              'Lợi nhuận',
-              '${balance >= 0 ? '+' : ''}${_formatCurrency(balance)}',
-              Icons.trending_up,
-              balance >= 0
-                  ? Colors.green
-                  : Colors.red,
+            child: Consumer<SettingsProvider>(
+              builder: (context, settings, child) {
+                return _buildOverviewCard(
+                  settings.isEnglish ? 'Profit' : 'Lợi nhuận',
+                  '${balance >= 0 ? '+' : ''}${_formatCurrency(balance)}',
+                  Icons.trending_up,
+                  balance >= 0
+                      ? Colors.green
+                      : Colors.red,
+                );
+              },
             ),
           ),
         ],
@@ -311,8 +341,184 @@ class _StatisticsScreenState
     );
   }
 
+  Widget _buildTransactionsList(
+      ExpenseProvider expenseProvider,
+      SettingsProvider settings) {
+    final recentTransactions = expenseProvider.expenses
+        .take(10)
+        .toList();
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  settings.isEnglish ? 'Recent Transactions' : 'Giao dịch gần đây',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  settings.isEnglish ? 'View All' : 'Xem tất cả',
+                  style: TextStyle(
+                    color: Colors.blue[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (recentTransactions.isNotEmpty)
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: recentTransactions.length,
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                color: Colors.grey[200],
+              ),
+              itemBuilder: (context, index) {
+                final expense = recentTransactions[index];
+                final isIncome = expense.type == 'Thu nhập';
+                final color = isIncome ? Colors.green : Colors.red;
+                
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      _getCategoryIcon(expense.category),
+                      color: color,
+                      size: 24,
+                    ),
+                  ),
+                  title: Text(
+                    expense.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        expense.category,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        DateFormat('dd/MM/yyyy').format(expense.date),
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                  trailing: Text(
+                    '${isIncome ? '+' : '-'}${_formatCurrency(expense.amount.abs())}',
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                );
+              },
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.all(40),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.receipt_long,
+                      size: 48,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      settings.isEnglish ? 'No transactions yet' : 'Chưa có giao dịch nào',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'ăn uống':
+        return Icons.restaurant;
+      case 'di chuyển':
+        return Icons.directions_car;
+      case 'nhà cửa':
+        return Icons.home;
+      case 'sức khỏe':
+        return Icons.local_hospital;
+      case 'giải trí':
+        return Icons.movie;
+      case 'quần áo':
+        return Icons.shopping_bag;
+      case 'giáo dục':
+        return Icons.school;
+      case 'du lịch':
+        return Icons.flight;
+      case 'lương':
+        return Icons.work;
+      case 'thưởng':
+        return Icons.card_giftcard;
+      case 'bán hàng':
+        return Icons.store;
+      case 'đầu tư':
+        return Icons.trending_up;
+      default:
+        return Icons.category;
+    }
+  }
+
   Widget _buildCategoryChart(
-      ExpenseProvider expenseProvider) {
+      ExpenseProvider expenseProvider,
+      SettingsProvider settings) {
     final categoryExpenses = <String, double>{};
 
     for (var expense
@@ -344,12 +550,16 @@ class _StatisticsScreenState
         crossAxisAlignment:
             CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Chi tiêu theo danh mục',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          Consumer<SettingsProvider>(
+            builder: (context, settings, child) {
+              return Text(
+                settings.isEnglish ? 'Expenses by Category' : 'Chi tiêu theo danh mục',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
           ),
           const SizedBox(height: 20),
           if (categoryExpenses.isNotEmpty)
@@ -364,9 +574,13 @@ class _StatisticsScreenState
               ),
             )
           else
-            const Expanded(
+            Expanded(
               child: Center(
-                child: Text('Chưa có dữ liệu'),
+                child: Consumer<SettingsProvider>(
+                  builder: (context, settings, child) {
+                    return Text(settings.isEnglish ? 'No data available' : 'Chưa có dữ liệu');
+                  },
+                ),
               ),
             ),
         ],
@@ -375,85 +589,8 @@ class _StatisticsScreenState
   }
 
   Widget _buildTrendChart(
-      ExpenseProvider expenseProvider) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 0,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: const Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Xu hướng chi tiêu',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-          Expanded(
-            child: Center(
-              child: Text('Đang phát triển...'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildComparisonChart(
-      ExpenseProvider expenseProvider) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 0,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: const Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-        children: [
-          Text(
-            'So sánh thời gian',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-          Expanded(
-            child: Center(
-              child: Text('Đang phát triển...'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInsights(
-      ExpenseProvider expenseProvider) {
+      ExpenseProvider expenseProvider,
+      SettingsProvider settings) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -473,9 +610,89 @@ class _StatisticsScreenState
         crossAxisAlignment:
             CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Nhận xét thông minh',
-            style: TextStyle(
+          Text(
+            settings.isEnglish ? 'Spending Trends' : 'Xu hướng chi tiêu',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Center(
+              child: Text(settings.isEnglish ? 'Coming soon...' : 'Đang phát triển...'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComparisonChart(
+      ExpenseProvider expenseProvider,
+      SettingsProvider settings) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          Text(
+            settings.isEnglish ? 'Time Comparison' : 'So sánh thời gian',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Center(
+              child: Text(settings.isEnglish ? 'Coming soon...' : 'Đang phát triển...'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInsights(
+      ExpenseProvider expenseProvider,
+      SettingsProvider settings) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+        children: [
+          Text(
+            settings.isEnglish ? 'Smart Insights' : 'Nhận xét thông minh',
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -483,22 +700,28 @@ class _StatisticsScreenState
           const SizedBox(height: 16),
           _buildInsightItem(
             Icons.lightbulb_outline,
-            'Gợi ý tiết kiệm',
-            'Bạn có thể tiết kiệm 15% bằng cách giảm chi tiêu ăn uống',
+            settings.isEnglish ? 'Saving Tips' : 'Gợi ý tiết kiệm',
+            settings.isEnglish 
+              ? 'You can save 15% by reducing food expenses'
+              : 'Bạn có thể tiết kiệm 15% bằng cách giảm chi tiêu ăn uống',
             Colors.orange,
           ),
           const SizedBox(height: 12),
           _buildInsightItem(
             Icons.trending_up,
-            'Xu hướng tăng',
-            'Chi tiêu của bạn tăng 8% so với tháng trước',
+            settings.isEnglish ? 'Increasing Trend' : 'Xu hướng tăng',
+            settings.isEnglish 
+              ? 'Your spending increased 8% compared to last month'
+              : 'Chi tiêu của bạn tăng 8% so với tháng trước',
             Colors.red,
           ),
           const SizedBox(height: 12),
           _buildInsightItem(
             Icons.star_outline,
-            'Thành tựu',
-            'Bạn đã đạt mục tiêu tiết kiệm tháng này!',
+            settings.isEnglish ? 'Achievement' : 'Thành tựu',
+            settings.isEnglish 
+              ? 'You achieved your savings goal this month!'
+              : 'Bạn đã đạt mục tiêu tiết kiệm tháng này!',
             Colors.green,
           ),
         ],
