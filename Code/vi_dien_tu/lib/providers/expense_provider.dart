@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:vi_dien_tu/models/expense.dart';
 import 'package:vi_dien_tu/services/database_service.dart';
+import 'package:vi_dien_tu/services/api_service.dart';
 import 'package:intl/intl.dart';
 
 class ExpenseProvider with ChangeNotifier {
@@ -17,7 +18,21 @@ class ExpenseProvider with ChangeNotifier {
 
   Future<void> fetchExpenses() async {
     try {
-      _expenses = await DatabaseService.getExpenses();
+      final dbExpenses = await DatabaseService.getExpenses();
+      final apiService = ApiService();
+      final apiExpenses = await apiService.getAllExpenses();
+      
+      // Kết hợp cả hai nguồn dữ liệu
+      _expenses = [...dbExpenses, ...apiExpenses];
+      
+      // Loại bỏ trùng lặp dựa trên ID
+      final uniqueExpenses = <String, Expense>{};
+      for (var expense in _expenses) {
+        uniqueExpenses[expense.id] = expense;
+      }
+      
+      _expenses = uniqueExpenses.values.toList();
+      _expenses.sort((a, b) => b.date.compareTo(a.date));
       _filteredExpenses = _expenses;
       notifyListeners();
     } catch (e) {
@@ -27,10 +42,15 @@ class ExpenseProvider with ChangeNotifier {
 
   Future<void> addExpense(Expense expense) async {
     try {
-      _expenses.add(expense);
-      await DatabaseService.saveExpenses(_expenses);
-      _filteredExpenses = List.from(_expenses);
-      notifyListeners();
+      // Lấy danh sách expenses hiện tại từ database
+      final dbExpenses = await DatabaseService.getExpenses();
+      
+      // Thêm expense mới vào danh sách database
+      dbExpenses.add(expense);
+      await DatabaseService.saveExpenses(dbExpenses);
+      
+      // Cập nhật lại danh sách kết hợp
+      await fetchExpenses();
     } catch (e) {
       throw Exception("Failed to add expense: $e");
     }
@@ -38,15 +58,17 @@ class ExpenseProvider with ChangeNotifier {
 
   Future<void> updateExpense(Expense updatedExpense) async {
     try {
-      final index = _expenses.indexWhere((e) => e.id == updatedExpense.id);
+      // Lấy danh sách expenses hiện tại từ database
+      final dbExpenses = await DatabaseService.getExpenses();
+      
+      // Tìm và cập nhật expense trong database
+      final index = dbExpenses.indexWhere((e) => e.id == updatedExpense.id);
       if (index != -1) {
-        _expenses[index] = updatedExpense;
-        final filterIndex = _filteredExpenses.indexWhere((e) => e.id == updatedExpense.id);
-        if (filterIndex != -1) {
-          _filteredExpenses[filterIndex] = updatedExpense;
-        }
-        await DatabaseService.saveExpenses(_expenses);
-        notifyListeners();
+        dbExpenses[index] = updatedExpense;
+        await DatabaseService.saveExpenses(dbExpenses);
+        
+        // Cập nhật lại danh sách kết hợp
+        await fetchExpenses();
       }
     } catch (e) {
       throw Exception("Failed to update expense: $e");
@@ -55,10 +77,15 @@ class ExpenseProvider with ChangeNotifier {
 
   Future<void> deleteExpense(Expense expense) async {
     try {
-      _expenses.removeWhere((e) => e.id == expense.id);
-      await DatabaseService.saveExpenses(_expenses);
-      _filteredExpenses = List.from(_expenses);
-      notifyListeners();
+      // Lấy danh sách expenses hiện tại từ database
+      final dbExpenses = await DatabaseService.getExpenses();
+      
+      // Xóa expense khỏi database
+      dbExpenses.removeWhere((e) => e.id == expense.id);
+      await DatabaseService.saveExpenses(dbExpenses);
+      
+      // Cập nhật lại danh sách kết hợp
+      await fetchExpenses();
     } catch (e) {
       throw Exception('Failed to delete expense: $e');
     }

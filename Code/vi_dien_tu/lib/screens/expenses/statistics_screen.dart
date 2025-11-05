@@ -5,6 +5,8 @@ import 'package:vi_dien_tu/providers/expense_provider.dart';
 import 'package:vi_dien_tu/providers/wallet_provider.dart';
 import 'package:vi_dien_tu/providers/settings_provider.dart';
 import 'package:vi_dien_tu/utils/translations.dart';
+import 'package:vi_dien_tu/services/database_service.dart';
+import 'package:vi_dien_tu/models/transaction.dart';
 import 'package:intl/intl.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -25,7 +27,7 @@ class _StatisticsScreenState
   void initState() {
     super.initState();
     _tabController =
-        TabController(length: 3, vsync: this);
+        TabController(length: 4, vsync: this);
   }
 
   @override
@@ -100,6 +102,7 @@ class _StatisticsScreenState
                     children: [
                       _buildCategoryChart(
                           expenseProvider, settings),
+                      _buildTransferHistoryTab(settings),
                       _buildTrendChart(
                           expenseProvider, settings),
                       _buildComparisonChart(
@@ -171,6 +174,7 @@ class _StatisticsScreenState
         unselectedLabelColor: Colors.white70,
         tabs: [
           Tab(text: Provider.of<SettingsProvider>(context).isEnglish ? 'Categories' : 'Danh mục'),
+          Tab(text: Provider.of<SettingsProvider>(context).isEnglish ? 'Transfer History' : 'LS Chuyển tiền'),
           Tab(text: Provider.of<SettingsProvider>(context).isEnglish ? 'Trends' : 'Xu hướng'),
           Tab(text: Provider.of<SettingsProvider>(context).isEnglish ? 'Compare' : 'So sánh'),
         ],
@@ -591,6 +595,8 @@ class _StatisticsScreenState
   Widget _buildTrendChart(
       ExpenseProvider expenseProvider,
       SettingsProvider settings) {
+    final monthlyData = _getMonthlyTrends(expenseProvider);
+    
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -607,8 +613,7 @@ class _StatisticsScreenState
         ],
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             settings.isEnglish ? 'Spending Trends' : 'Xu hướng chi tiêu',
@@ -619,9 +624,56 @@ class _StatisticsScreenState
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: Center(
-              child: Text(settings.isEnglish ? 'Coming soon...' : 'Đang phát triển...'),
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(show: false),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        const months = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
+                        if (value.toInt() < months.length) {
+                          return Text(months[value.toInt()], style: const TextStyle(fontSize: 12));
+                        }
+                        return const Text('');
+                      },
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: monthlyData,
+                    isCurved: true,
+                    color: Colors.red,
+                    barWidth: 3,
+                    dotData: FlDotData(show: true),
+                  ),
+                ],
+              ),
             ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Container(
+                width: 12,
+                height: 12,
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                settings.isEnglish ? 'Monthly Expenses' : 'Chi tiêu hàng tháng',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
           ),
         ],
       ),
@@ -631,6 +683,8 @@ class _StatisticsScreenState
   Widget _buildComparisonChart(
       ExpenseProvider expenseProvider,
       SettingsProvider settings) {
+    final comparisonData = _getComparisonData(expenseProvider);
+    
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -647,11 +701,10 @@ class _StatisticsScreenState
         ],
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            settings.isEnglish ? 'Time Comparison' : 'So sánh thời gian',
+            settings.isEnglish ? 'Income vs Expenses' : 'Thu nhập vs Chi tiêu',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -659,9 +712,98 @@ class _StatisticsScreenState
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: Center(
-              child: Text(settings.isEnglish ? 'Coming soon...' : 'Đang phát triển...'),
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: comparisonData['maxValue']!,
+                barTouchData: BarTouchData(enabled: false),
+                titlesData: FlTitlesData(
+                  leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        switch (value.toInt()) {
+                          case 0:
+                            return Text(settings.isEnglish ? 'Income' : 'Thu nhập');
+                          case 1:
+                            return Text(settings.isEnglish ? 'Expenses' : 'Chi tiêu');
+                          default:
+                            return const Text('');
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                barGroups: [
+                  BarChartGroupData(
+                    x: 0,
+                    barRods: [
+                      BarChartRodData(
+                        toY: comparisonData['income']!,
+                        color: Colors.green,
+                        width: 40,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 1,
+                    barRods: [
+                      BarChartRodData(
+                        toY: comparisonData['expenses']!,
+                        color: Colors.red,
+                        width: 40,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatCurrency(comparisonData['income']!),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatCurrency(comparisonData['expenses']!),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -772,6 +914,202 @@ class _StatisticsScreenState
         ),
       ],
     );
+  }
+
+  Widget _buildTransferHistoryTab(SettingsProvider settings) {
+    return FutureBuilder<List<Transaction>>(
+      future: DatabaseService.getTransactions(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.swap_horiz, size: 64, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  settings.isEnglish ? 'No transfer history' : 'Chưa có lịch sử chuyển tiền',
+                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        final transactions = snapshot.data!;
+        return Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 0,
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  settings.isEnglish ? 'Recent Transfers' : 'Chuyển tiền gần đây',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: transactions.length > 10 ? 10 : transactions.length,
+                  separatorBuilder: (context, index) => Divider(
+                    height: 1,
+                    color: Colors.grey[200],
+                  ),
+                  itemBuilder: (context, index) {
+                    final transaction = transactions[index];
+                    return _buildTransferItem(transaction, settings);
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  
+  Widget _buildTransferItem(Transaction transaction, SettingsProvider settings) {
+    IconData icon;
+    Color color;
+    String title;
+    
+    switch (transaction.type) {
+      case 'transfer':
+        icon = Icons.swap_horiz;
+        color = Colors.blue;
+        title = settings.isEnglish ? 'Transfer' : 'Chuyển tiền';
+        break;
+      case 'payment':
+        icon = Icons.payment;
+        color = Colors.red;
+        title = settings.isEnglish ? 'Payment' : 'Thanh toán';
+        break;
+      case 'receive':
+        icon = Icons.call_received;
+        color = Colors.green;
+        title = settings.isEnglish ? 'Received' : 'Nhận tiền';
+        break;
+      default:
+        icon = Icons.account_balance_wallet;
+        color = Colors.grey;
+        title = transaction.type;
+    }
+    
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      ),
+      title: Text(
+        transaction.recipientName ?? title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+        ),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            transaction.description ?? '',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 12,
+            ),
+          ),
+          Text(
+            DateFormat('dd/MM/yyyy HH:mm').format(transaction.createdAt),
+            style: TextStyle(
+              color: Colors.grey[500],
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            '${transaction.type == 'receive' ? '+' : '-'}${_formatCurrency(transaction.amount)}',
+            style: TextStyle(
+              color: transaction.type == 'receive' ? Colors.green : Colors.red,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          if (transaction.fee != null && transaction.fee! > 0)
+            Text(
+              'Phí: ${_formatCurrency(transaction.fee!)}',
+              style: TextStyle(
+                color: Colors.grey[500],
+                fontSize: 10,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  List<FlSpot> _getMonthlyTrends(ExpenseProvider expenseProvider) {
+    final monthlyExpenses = <int, double>{};
+    final now = DateTime.now();
+    
+    for (var expense in expenseProvider.expenses) {
+      if (expense.type == 'Chi tiêu') {
+        final monthsAgo = now.month - expense.date.month + (now.year - expense.date.year) * 12;
+        if (monthsAgo >= 0 && monthsAgo < 6) {
+          monthlyExpenses[5 - monthsAgo] = (monthlyExpenses[5 - monthsAgo] ?? 0) + expense.amount.abs();
+        }
+      }
+    }
+    
+    return List.generate(6, (index) => FlSpot(index.toDouble(), (monthlyExpenses[index] ?? 0) / 1000000));
+  }
+  
+  Map<String, double> _getComparisonData(ExpenseProvider expenseProvider) {
+    final totalIncome = expenseProvider.expenses
+        .where((e) => e.type == 'Thu nhập')
+        .fold(0.0, (sum, e) => sum + e.amount.abs());
+    final totalExpenses = expenseProvider.expenses
+        .where((e) => e.type == 'Chi tiêu')
+        .fold(0.0, (sum, e) => sum + e.amount.abs());
+    
+    final maxValue = [totalIncome, totalExpenses].reduce((a, b) => a > b ? a : b);
+    
+    return {
+      'income': totalIncome / 1000000,
+      'expenses': totalExpenses / 1000000,
+      'maxValue': (maxValue / 1000000) * 1.2,
+    };
   }
 
   String _formatCurrency(double amount) {

@@ -78,7 +78,7 @@ class _QRScannerScreenState
                   decoration: BoxDecoration(
                     border: Border.all(
                       color:
-                          const Color(0xffef3c7b),
+                          const Color(0xFFDA020E),
                       width: 3,
                     ),
                     borderRadius:

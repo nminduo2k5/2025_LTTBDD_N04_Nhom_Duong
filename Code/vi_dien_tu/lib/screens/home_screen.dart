@@ -15,6 +15,11 @@ import 'package:vi_dien_tu/screens/services/data_package_screen.dart';
 import 'package:vi_dien_tu/screens/services/movie_tickets_screen.dart';
 import 'package:vi_dien_tu/screens/services/travel_screen.dart';
 import 'package:vi_dien_tu/screens/qr/qr_scanner_screen.dart';
+import 'package:vi_dien_tu/screens/finance/stocks_screen.dart';
+import 'package:vi_dien_tu/screens/finance/loans_screen.dart';
+import 'package:vi_dien_tu/screens/finance/credit_wallet_screen.dart';
+import 'package:vi_dien_tu/screens/games/quiz_arena_screen.dart';
+import 'package:vi_dien_tu/screens/games/lucky_bag_screen.dart';
 import 'package:vi_dien_tu/providers/wallet_provider.dart';
 import 'package:vi_dien_tu/providers/expense_provider.dart';
 import 'package:vi_dien_tu/providers/settings_provider.dart';
@@ -69,7 +74,8 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8DC), // Cream color inspired by Vietnamese rice fields
+      backgroundColor: const Color(
+          0xFFFFF8DC), // màu kem kem nhẹ nhàng
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {
@@ -135,8 +141,8 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (context, walletProvider,
           expenseProvider, settings, child) {
         return Scaffold(
-          backgroundColor:
-              const Color(0xFFFFF8DC), // Vietnamese rice field inspired
+          backgroundColor: const Color(
+              0xFFFFF8DC), // Vietnamese rice field inspired
           appBar: _buildMoMoAppBar(settings),
           body: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
@@ -190,12 +196,14 @@ class _HomeScreenState extends State<HomeScreen>
                     _buildWalletInfo(
                         walletProvider, settings),
                     const SizedBox(height: 24),
-                    _buildFinancialCenter(settings),
+                    _buildFinancialCenter(
+                        settings),
                     const SizedBox(height: 8),
                     _buildServiceGrid(settings),
                     const SizedBox(height: 24),
                     _buildRecentTransactions(
-                        expenseProvider, settings),
+                        expenseProvider,
+                        settings),
                     const SizedBox(height: 16),
                   ],
                 ),
@@ -215,7 +223,10 @@ class _HomeScreenState extends State<HomeScreen>
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFDA020E), Color(0xFFFFCD00)],
+            colors: [
+              Color(0xFFDA020E),
+              Color(0xFFFFCD00)
+            ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -260,9 +271,13 @@ class _HomeScreenState extends State<HomeScreen>
             width: 32,
             height: 20,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
+              borderRadius:
+                  BorderRadius.circular(4),
               gradient: const LinearGradient(
-                colors: [Color(0xFFDA020E), Color(0xFFDA020E)],
+                colors: [
+                  Color(0xFFDA020E),
+                  Color(0xFFDA020E)
+                ],
                 stops: [0.5, 0.5],
               ),
             ),
@@ -277,7 +292,8 @@ class _HomeScreenState extends State<HomeScreen>
           const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
@@ -306,7 +322,8 @@ class _HomeScreenState extends State<HomeScreen>
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius:
+                BorderRadius.circular(20),
           ),
           child: IconButton(
             icon: const Icon(Icons.notifications,
@@ -400,7 +417,8 @@ class _HomeScreenState extends State<HomeScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFDA020E).withOpacity(0.3),
+            color: const Color(0xFFDA020E)
+                .withOpacity(0.3),
             spreadRadius: 0,
             blurRadius: 15,
             offset: const Offset(0, 5),
@@ -418,7 +436,8 @@ class _HomeScreenState extends State<HomeScreen>
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: Colors.yellow.withOpacity(0.2),
+                color: Colors.yellow
+                    .withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -433,12 +452,14 @@ class _HomeScreenState extends State<HomeScreen>
             left: -5,
             child: Icon(
               Icons.star,
-              color: Colors.yellow.withOpacity(0.6),
+              color:
+                  Colors.yellow.withOpacity(0.6),
               size: 25,
             ),
           ),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -472,8 +493,8 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                   const Spacer(),
                   Text(
-                    _formatCurrency(
-                        walletProvider.totalBalance),
+                    _formatCurrency(walletProvider
+                        .totalBalance),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -484,13 +505,16 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(
+                padding:
+                    const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.yellow.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
+                  color: Colors.yellow
+                      .withOpacity(0.2),
+                  borderRadius:
+                      BorderRadius.circular(20),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -508,7 +532,8 @@ class _HomeScreenState extends State<HomeScreen>
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                        fontWeight:
+                            FontWeight.w500,
                       ),
                     ),
                   ],
@@ -524,10 +549,14 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildFinancialCenter(
       SettingsProvider settings) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFCD00), Color(0xFFFFF3A0)],
+          colors: [
+            Color(0xFFFFCD00),
+            Color(0xFFFFF3A0)
+          ],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
@@ -574,14 +603,19 @@ class _HomeScreenState extends State<HomeScreen>
           Iconsax.chart,
           settings.isEnglish
               ? 'Stocks'
-              : 'Chứng Khoán',
-          () => _onItemTapped(3)),
+              : 'Chứng Khoán', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const StocksScreen()),
+        );
+      }),
       _ServiceData(
           Iconsax.bank,
           settings.isEnglish
               ? 'Transfer'
-              : 'Chuyển tiền',
-          () {
+              : 'Chuyển tiền', () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -629,26 +663,50 @@ class _HomeScreenState extends State<HomeScreen>
           Iconsax.medal_star,
           settings.isEnglish
               ? 'Quiz Arena'
-              : 'Đấu Trường Tri Thức',
-          () {}),
+              : 'Đấu Trường Tri Thức', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const QuizArenaScreen()),
+        );
+      }),
       _ServiceData(
           Iconsax.money_recive,
           settings.isEnglish
               ? 'Lucky Bag'
-              : 'Túi Thần Tài',
-          () {}),
+              : 'Túi Thần Tài', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const LuckyBagScreen()),
+        );
+      }),
       _ServiceData(
           Iconsax.wallet,
           settings.isEnglish
               ? 'Credit Wallet'
-              : 'Ví Trả Sau',
-          () {}),
+              : 'Ví Trả Sau', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const CreditWalletScreen()),
+        );
+      }),
       _ServiceData(
           Iconsax.home,
           settings.isEnglish
               ? 'Loans'
-              : 'Khoản vay',
-          () {}),
+              : 'Khoản vay', () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  const LoansScreen()),
+        );
+      }),
       _ServiceData(
           Iconsax.video_play,
           settings.isEnglish
@@ -786,42 +844,166 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildMoreScreen() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        return Scaffold(
+          backgroundColor:
+              const Color(0xFFFFF8DC),
+          appBar: AppBar(
+            title: Text(
+              settings.isEnglish
+                  ? '👤 Profile'
+                  : '👤 Hồ Sơ',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor:
+                const Color(0xFFDA020E),
+            elevation: 0,
+            automaticallyImplyLeading: false,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildDeveloperInfo(),
+                const SizedBox(height: 24),
+                _buildMoreOption(
+                    Icons.calendar_today,
+                    Translations.get('calendar',
+                        settings.isEnglish), () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const CalendarScreen()),
+                  );
+                }),
+                _buildMoreOption(
+                    Icons.settings,
+                    Translations.get('settings',
+                        settings.isEnglish), () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const SettingsScreen()),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDeveloperInfo() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFDA020E),
+            Color(0xFFFFCD00)
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
       child: Column(
         children: [
-          const SizedBox(height: 60),
-          Consumer<SettingsProvider>(
-            builder: (context, settings, child) {
-              return Column(
-                children: [
-                  _buildMoreOption(
-                      Icons.calendar_today,
-                      Translations.get('calendar',
-                          settings.isEnglish),
-                      () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const CalendarScreen()),
-                    );
-                  }),
-                  _buildMoreOption(
-                      Icons.settings,
-                      Translations.get('settings',
-                          settings.isEnglish),
-                      () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              const SettingsScreen()),
-                    );
-                  }),
-                ],
-              );
-            },
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.school,
+                color: Colors.white,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                '👨🎓 Thông Tin Sinh Viên',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildDeveloperInfoRow(
+              'Họ và tên:', 'Nguyễn Minh Dương'),
+          _buildDeveloperInfoRow(
+              'MSSV:', '23010441'),
+          _buildDeveloperInfoRow(
+              'Lớp:', 'LTTBDD-1-1-25(N04)'),
+          _buildDeveloperInfoRow('Nhóm:',
+              '2025_LTTBDD_N04_Nhom_Duong'),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color:
+                  Colors.white.withOpacity(0.2),
+              borderRadius:
+                  BorderRadius.circular(20),
+            ),
+            child: const Text(
+              '🇻🇳 SmartWallet Developer',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeveloperInfoRow(
+      String label, String value) {
+    return Padding(
+      padding:
+          const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -922,7 +1104,8 @@ class _MoMoServiceIcon extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFFDA020E).withOpacity(0.3),
+                  color: const Color(0xFFDA020E)
+                      .withOpacity(0.3),
                   spreadRadius: 0,
                   blurRadius: 8,
                   offset: const Offset(0, 3),
@@ -943,7 +1126,8 @@ class _MoMoServiceIcon extends StatelessWidget {
                   right: 2,
                   child: Icon(
                     Icons.star,
-                    color: Colors.yellow.withOpacity(0.8),
+                    color: Colors.yellow
+                        .withOpacity(0.8),
                     size: 12,
                   ),
                 ),
